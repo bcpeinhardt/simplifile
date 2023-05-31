@@ -3,7 +3,18 @@
 [![Package Version](https://img.shields.io/hexpm/v/simplifile)](https://hex.pm/packages/simplifile)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/simplifile/)
 
-A Gleam project
+Simplifile provides basic file operations (read, write, append, and delete) that work
+for all targets (Erlang, Node, and Deno).
+
+## Example
+```gleam
+let filepath = "./test/hello.txt"
+let assert Ok(_) = "Hello, World" |> write(to: filepath)
+let assert Ok(_) = "Goodbye, Mars" |> append(to: filepath)
+let assert Ok("Hello, WorldGoodbye, Mars") = read(from: filepath)
+let assert Ok(_) = delete(filepath)
+let assert Error(_) = read(from: filepath)
+```
 
 ## Quick start
 
