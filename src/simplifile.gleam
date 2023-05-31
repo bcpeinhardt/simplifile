@@ -107,82 +107,117 @@ pub type FileError {
   Unknown
 }
 
+/// Read a files contents as a string
+/// ## Example
+/// ```gleam
+/// let assert Ok(records) = read(from: "./users.csv")
+/// ```
+/// ### A note about utf8
+/// Currently on the erlang target, this function expects a utf8 string
+/// and returns a `NotUtf8` error if it reads a non utf8 string.
+/// On the javascript target, it will read any string.
+/// This behavior will probably change soon.
+///
+pub fn read(from filepath: String) -> Result(String, FileError) {
+  do_read(filepath)
+  |> cast_error
+}
+
+/// Write a string to a file at the given path
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = write("Hello, World!", to: "./hello_world.txt")
+/// ```
+///
+pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
+  do_write(contents, to: filepath)
+  |> cast_error
+}
+
+/// Delete a file at a given filepath
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
+/// ```
+///
+pub fn delete(file_at filepath: String) -> Result(Nil, FileError) {
+  do_delete(filepath)
+  |> cast_error
+}
+
+/// Append a string to the contents of a file at the given path
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = append("more text", to: "./needs_more_text.txt")
+/// ```
+///
+pub fn append(contents: String, to filepath: String) -> Result(Nil, FileError) {
+  do_append(contents, to: filepath)
+  |> cast_error
+}
+
+/// Read a files contents as a bitstring
+/// ## Example
+/// ```gleam
+/// let assert Ok(records) = read_bits(from: "./users.csv")
+/// ```
+///
+pub fn read_bits(from filepath: String) -> Result(BitString, FileError) {
+  do_read_bits(filepath)
+  |> cast_error
+}
+
+/// Write a bitstring to a file at the given path
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = write_bits(<<"Hello, World!":utf8>>, to: "./hello_world.txt")
+/// ```
+///
+pub fn write_bits(
+  bits: BitString,
+  to filepath: String,
+) -> Result(Nil, FileError) {
+  do_write_bits(bits, filepath)
+  |> cast_error
+}
+
+/// Append a string to the contents of a file at the given path
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = append_bits(<<"more text":utf8>>, to: "./needs_more_text.txt")
+/// ```
+///
+pub fn append_bits(
+  bits: BitString,
+  to filepath: String,
+) -> Result(Nil, FileError) {
+  do_append_bits(bits, filepath)
+  |> cast_error
+}
+
 if javascript {
   import gleam/result
 
-  external fn read_(from: String) -> Result(String, String) =
+  external fn do_read(from: String) -> Result(String, String) =
     "./file.mjs" "readFile"
 
-  /// Read a files contents as a string
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(records) = read(from: "./users.csv")
-  /// ```
-  ///
-  pub fn read(from from: String) -> Result(String, FileError) {
-    read_(from)
-    |> cast_error
-  }
-
-  external fn write_(String, to: String) -> Result(Nil, String) =
+  external fn do_write(String, to: String) -> Result(Nil, String) =
     "./file.mjs" "writeFile"
 
-  /// Write a string to a given file
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = write("Hello, World!", to: "./hello_world.txt")
-  /// ```
-  ///
-  pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
-    write_(contents, to: filepath)
-    |> cast_error
-  }
-
-  external fn delete_(file_at: String) -> Result(Nil, String) =
+  external fn do_delete(file_at: String) -> Result(Nil, String) =
     "./file.mjs" "deleteFile"
 
-  pub fn delete(file_at filepath: String) -> Result(Nil, FileError) {
-    delete_(file_at: filepath)
-    |> cast_error
-  }
-
-  external fn append_(String, to: String) -> Result(Nil, String) =
+  external fn do_append(String, to: String) -> Result(Nil, String) =
     "./file.mjs" "appendFile"
 
-  pub fn append(contents: String, to filepath: String) -> Result(Nil, FileError) {
-    append_(contents, to: filepath)
-    |> cast_error
-  }
-
-  external fn read_bits_(from: String) -> Result(BitString, String) =
+  external fn do_read_bits(from: String) -> Result(BitString, String) =
     "./file.mjs" "readBits"
 
-  pub fn read_bits(from filepath: String) -> Result(BitString, FileError) {
-    read_bits_(from: filepath)
-    |> cast_error
-  }
-
-  external fn write_bits_(BitString, to: String) -> Result(Nil, String) =
+  external fn do_write_bits(BitString, to: String) -> Result(Nil, String) =
     "./file.mjs" "writeBits"
 
-  pub fn write_bits(
-    contents: BitString,
-    to filepath: String,
-  ) -> Result(Nil, FileError) {
-    write_bits_(contents, to: filepath)
-    |> cast_error
-  }
-
-  external fn append_bits_(BitString, to: String) -> Result(Nil, String) =
+  external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
     "./file.mjs" "appendBits"
-
-  pub fn append_bits(
-    contents: BitString,
-    to filepath: String,
-  ) -> Result(Nil, FileError) {
-    append_bits_(contents, to: filepath)
-    |> cast_error
-  }
 
   fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
     result.map_error(
@@ -245,91 +280,12 @@ if javascript {
 }
 
 if erlang {
-  import gleam/erlang/file.{Reason}
+  import gleam/erlang/file.{
+    Reason, append as do_append, append_bits as do_append_bits,
+    delete as do_delete, read as do_read, read_bits as do_read_bits,
+    write as do_write, write_bits as do_write_bits,
+  }
   import gleam/result
-
-  /// Read a files contents as a string
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(records) = read(from: "./users.csv")
-  /// ```
-  ///
-  pub fn read(from filepath: String) -> Result(String, FileError) {
-    file.read(filepath)
-    |> cast_error
-  }
-
-  /// Write a string to a file at the given path
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = write("Hello, World!", to: "./hello_world.txt")
-  /// ```
-  ///
-  pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
-    file.write(contents, to: filepath)
-    |> cast_error
-  }
-
-  /// Delete a file at a given filepath
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
-  /// ```
-  ///
-  pub fn delete(file_at filepath: String) -> Result(Nil, FileError) {
-    file.delete(filepath)
-    |> cast_error
-  }
-
-  /// Append a string to the contents of a file at the given path
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = append("more text", to: "./needs_more_text.txt")
-  /// ```
-  ///
-  pub fn append(contents: String, to filepath: String) -> Result(Nil, FileError) {
-    file.append(contents, to: filepath)
-    |> cast_error
-  }
-
-  /// Read a files contents as a bitstring
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(records) = read_bits(from: "./users.csv")
-  /// ```
-  ///
-  pub fn read_bits(from filepath: String) -> Result(BitString, FileError) {
-    file.read_bits(filepath)
-    |> cast_error
-  }
-
-  /// Write a bitstring to a file at the given path
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = write_bits(<<"Hello, World!":utf8>>, to: "./hello_world.txt")
-  /// ```
-  ///
-  pub fn write_bits(
-    bits: BitString,
-    to filepath: String,
-  ) -> Result(Nil, FileError) {
-    file.write_bits(bits, filepath)
-    |> cast_error
-  }
-
-  /// Append a string to the contents of a file at the given path
-  /// ## Example
-  /// ```gleam
-  /// let assert Ok(Nil) = append_bits(<<"more text":utf8>>, to: "./needs_more_text.txt")
-  /// ```
-  ///
-  pub fn append_bits(
-    bits: BitString,
-    to filepath: String,
-  ) -> Result(Nil, FileError) {
-    file.append_bits(bits, filepath)
-    |> cast_error
-  }
 
   fn cast_error(input: Result(a, Reason)) -> Result(a, FileError) {
     result.map_error(
