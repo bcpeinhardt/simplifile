@@ -15,7 +15,6 @@ allow_all = true
 [dependencies]
 gleam_stdlib = "~> 0.29"
 gleam_erlang = "~> 0.19"
-gleam_javascript = "~> 0.4"
 
 [dev-dependencies]
 gleeunit = "~> 0.10"
