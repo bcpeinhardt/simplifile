@@ -181,7 +181,7 @@ pub fn write_bits(
   |> cast_error
 }
 
-/// Append a string to the contents of a file at the given path
+/// Append a bitstring to the contents of a file at the given path
 /// ## Example
 /// ```gleam
 /// let assert Ok(Nil) = append_bits(<<"more text":utf8>>, to: "./needs_more_text.txt")
@@ -193,6 +193,36 @@ pub fn append_bits(
 ) -> Result(Nil, FileError) {
   do_append_bits(bits, filepath)
   |> cast_error
+}
+
+/// Checks if the provided filepath is a directory
+/// ## Example
+/// ```gleam
+/// let assert True = is_directory("./test")
+/// ```
+pub fn is_directory(filepath: String) -> Bool {
+  do_is_directory(filepath)
+}
+
+/// Lists the contents of a directory
+/// ## Example
+/// Given a folder structure
+/// - Folder1
+///   - Folder2
+///   - File.txt
+/// 
+/// ```gleam
+/// let assert ["File.txt", "Folder2"] = contents("./Folder1")
+/// ```
+/// 
+/// ## Panics
+/// This function will panic if called on a path which is not
+/// an existing directory. It is expected that you use 
+/// `is_directory` to check whether the directory exists.
+pub fn contents(directory: String) -> List(String) {
+  let assert True = is_directory(directory)
+  let assert Ok(stuff) = do_list_contents(directory)
+  stuff
 }
 
 if javascript {
@@ -218,6 +248,12 @@ if javascript {
 
   external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
     "./file.mjs" "appendBits"
+
+  external fn do_is_directory(String) -> Bool =
+    "./file.mjs" "isDirectory"
+
+  external fn do_list_contents(String) -> Result(List(String), FileError) =
+    "./file.mjs" "listContents"
 
   fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
     result.map_error(
@@ -321,4 +357,12 @@ if erlang {
   fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
     input
   }
+
+  external fn do_is_directory(String) -> Bool =
+    "filelib" "is_dir"
+
+  external fn do_list_contents(
+    directory: String,
+  ) -> Result(List(String), FileError) =
+    "gleam_erlang_ffi" "list_directory"
 }

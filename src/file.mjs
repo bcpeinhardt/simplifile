@@ -1,6 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
-import { BitString, Ok, Error as GError } from "./gleam.mjs";
+import { BitString, Ok, Error as GError, toList} from "./gleam.mjs";
 
 export function readFile(filepath) {
     try {
@@ -67,4 +67,18 @@ export function appendBits(contents, filepath) {
 
 function stringifyError(e) {
     return e.code
+}
+
+export function isDirectory(filepath) {
+    let fp = path.normalize(filepath)
+    return fs.existsSync(fp) && fs.lstatSync(fp).isDirectory();
+}
+
+export function listContents(filepath) {
+    try {
+        const stuff = toList(fs.readdirSync(path.normalize(filepath)))
+        return new Ok(stuff)
+    } catch(e) {
+        return new GError(stringifyError(e))
+    }
 }

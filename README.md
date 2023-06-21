@@ -4,7 +4,7 @@
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/simplifile/)
 
 Simplifile provides basic file operations (read, write, append, and delete) that work
-for all targets (Erlang, Node, and Deno).
+for all targets (Erlang, Node, and Deno). It also provides functions for working with directories.
 
 ## Example
 ```gleam

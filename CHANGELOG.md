@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.4 - 21 June 2023
+- Add `is_directory` and `contents` functions for working with directories.
+
 ## v0.1.3 - 21 June 2023
 - Add ffi to remove gleam_erlang dependency
 

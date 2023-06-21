@@ -1,7 +1,8 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, append, append_bits, delete, read, read_bits, write, write_bits,
+  Enoent, append, append_bits, contents, delete, is_directory, read, read_bits,
+  write, write_bits,
 }
 
 pub fn main() {
@@ -46,4 +47,22 @@ pub fn reason_test() {
   let assert Error(e) = delete(file_at: filepath)
   e
   |> should.equal(Enoent)
+}
+
+pub fn path_test() {
+  let filepath = "./test/testfile.txt"
+  let assert Ok(_) =
+    "Hello"
+    |> write(to: filepath)
+
+  let assert False = is_directory(filepath)
+
+  let assert Ok(_) = delete(file_at: "./test/testfile.txt")
+}
+
+pub fn list_contents_test() {
+  let curr_dir = "./test"
+  let assert True = is_directory(curr_dir)
+  let assert ["another_dir", "simplifile_test.gleam", "test_dir"] =
+    contents(curr_dir)
 }
