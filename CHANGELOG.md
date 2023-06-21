@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.3 - 21 June 2023
+- Add ffi to remove gleam_erlang dependency
+
 ## v0.1.2 - 21 June 2023
 - Remove unnecessary dependency on `gleam_javascript`. Whoops.
 

@@ -280,68 +280,45 @@ if javascript {
 }
 
 if erlang {
-  import gleam/erlang/file.{
-    Reason, append as do_append, append_bits as do_append_bits,
-    delete as do_delete, read as do_read, read_bits as do_read_bits,
-    write as do_write, write_bits as do_write_bits,
-  }
-  import gleam/result
+  import gleam/bit_string
 
-  fn cast_error(input: Result(a, Reason)) -> Result(a, FileError) {
-    result.map_error(
-      input,
-      fn(e) {
-        case e {
-          file.Eacces -> Eacces
-          file.Eagain -> Eagain
-          file.Ebadf -> Ebadf
-          file.Ebadmsg -> Ebadmsg
-          file.Ebusy -> Ebusy
-          file.Edeadlk -> Edeadlk
-          file.Edeadlock -> Edeadlock
-          file.Edquot -> Edquot
-          file.Eexist -> Eexist
-          file.Efault -> Efault
-          file.Efbig -> Efbig
-          file.Eftype -> Eftype
-          file.Eintr -> Eintr
-          file.Einval -> Einval
-          file.Eio -> Eio
-          file.Eisdir -> Eisdir
-          file.Eloop -> Eloop
-          file.Emfile -> Emfile
-          file.Emlink -> Emlink
-          file.Emultihop -> Emultihop
-          file.Enametoolong -> Enametoolong
-          file.Enfile -> Enfile
-          file.Enobufs -> Enobufs
-          file.Enodev -> Enodev
-          file.Enolck -> Enolck
-          file.Enolink -> Enolink
-          file.Enoent -> Enoent
-          file.Enomem -> Enomem
-          file.Enospc -> Enospc
-          file.Enosr -> Enosr
-          file.Enostr -> Enostr
-          file.Enosys -> Enosys
-          file.Enotblk -> Enotblk
-          file.Enotdir -> Enotdir
-          file.Enotsup -> Enotsup
-          file.Enxio -> Enxio
-          file.Eopnotsupp -> Eopnotsupp
-          file.Eoverflow -> Eoverflow
-          file.Eperm -> Eperm
-          file.Epipe -> Epipe
-          file.Erange -> Erange
-          file.Erofs -> Erofs
-          file.Espipe -> Espipe
-          file.Esrch -> Esrch
-          file.Estale -> Estale
-          file.Etxtbsy -> Etxtbsy
-          file.Exdev -> Exdev
-          file.NotUtf8 -> NotUtf8
+  external fn do_append_bits(BitString, to: String) -> Result(Nil, FileError) =
+    "gleam_erlang_ffi" "append_file"
+
+  external fn do_write_bits(BitString, to: String) -> Result(Nil, FileError) =
+    "gleam_erlang_ffi" "write_file"
+
+  external fn do_read_bits(from: String) -> Result(BitString, FileError) =
+    "gleam_erlang_ffi" "read_file"
+
+  external fn do_delete(String) -> Result(Nil, FileError) =
+    "gleam_erlang_ffi" "delete_file"
+
+  fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
+    content
+    |> bit_string.from_string
+    |> do_append_bits(filepath)
+  }
+
+  fn do_write(content: String, to filepath: String) -> Result(Nil, FileError) {
+    content
+    |> bit_string.from_string
+    |> do_write_bits(filepath)
+  }
+
+  fn do_read(from filepath: String) -> Result(String, FileError) {
+    case do_read_bits(filepath) {
+      Ok(bit_str) -> {
+        case bit_string.to_string(bit_str) {
+          Ok(str) -> Ok(str)
+          _ -> Error(NotUtf8)
         }
-      },
-    )
+      }
+      Error(e) -> Error(e)
+    }
+  }
+
+  fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
+    input
   }
 }
