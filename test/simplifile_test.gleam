@@ -1,9 +1,10 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, append, append_bits, contents, delete, is_directory, read, read_bits,
-  write, write_bits,
+  Enoent, append, append_bits, delete, is_directory, list_contents, read,
+  read_bits, write, write_bits,
 }
+import gleam/list
 
 pub fn main() {
   gleeunit.main()
@@ -63,6 +64,11 @@ pub fn path_test() {
 pub fn list_contents_test() {
   let curr_dir = "./test"
   let assert True = is_directory(curr_dir)
-  let assert ["another_dir", "simplifile_test.gleam", "test_dir"] =
-    contents(curr_dir)
+  let assert Ok(stuff) = list_contents(of: curr_dir)
+  let assert True = list.contains(stuff, "another_dir")
+  let assert True = list.contains(stuff, "test_dir")
+  let assert True = list.contains(stuff, "simplifile_test.gleam")
+
+  let assert Error(_) = list_contents(of: "./test/simplifile_test.gleam")
+  let assert Error(_) = list_contents(of: "./test/i_dont_exist")
 }

@@ -204,25 +204,16 @@ pub fn is_directory(filepath: String) -> Bool {
   do_is_directory(filepath)
 }
 
-/// Lists the contents of a directory
-/// ## Example
-/// Given a folder structure
-/// - Folder1
-///   - Folder2
-///   - File.txt
+/// Lists the contents of a directory.
+/// The list contains directory and file names, and is not recursive.
 /// 
+/// ## Example
 /// ```gleam
-/// let assert ["File.txt", "Folder2"] = contents("./Folder1")
+/// let assert Ok(files_and_folders) = list_contents(of: "./Folder1")
 /// ```
 /// 
-/// ## Panics
-/// This function will panic if called on a path which is not
-/// an existing directory. It is expected that you use 
-/// `is_directory` to check whether the directory exists.
-pub fn contents(directory: String) -> List(String) {
-  let assert True = is_directory(directory)
-  let assert Ok(stuff) = do_list_contents(directory)
-  stuff
+pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
+  do_list_contents(directory)
 }
 
 if javascript {
