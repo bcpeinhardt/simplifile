@@ -216,144 +216,162 @@ pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
   do_list_contents(directory)
 }
 
-if javascript {
-  import gleam/result
+@target(javascript)
+import gleam/result
 
-  external fn do_read(from: String) -> Result(String, String) =
-    "./file.mjs" "readFile"
+@target(javascript)
+external fn do_read(from: String) -> Result(String, String) =
+  "./file.mjs" "readFile"
 
-  external fn do_write(String, to: String) -> Result(Nil, String) =
-    "./file.mjs" "writeFile"
+@target(javascript)
+external fn do_write(String, to: String) -> Result(Nil, String) =
+  "./file.mjs" "writeFile"
 
-  external fn do_delete(file_at: String) -> Result(Nil, String) =
-    "./file.mjs" "deleteFile"
+@target(javascript)
+external fn do_delete(file_at: String) -> Result(Nil, String) =
+  "./file.mjs" "deleteFile"
 
-  external fn do_append(String, to: String) -> Result(Nil, String) =
-    "./file.mjs" "appendFile"
+@target(javascript)
+external fn do_append(String, to: String) -> Result(Nil, String) =
+  "./file.mjs" "appendFile"
 
-  external fn do_read_bits(from: String) -> Result(BitString, String) =
-    "./file.mjs" "readBits"
+@target(javascript)
+external fn do_read_bits(from: String) -> Result(BitString, String) =
+  "./file.mjs" "readBits"
 
-  external fn do_write_bits(BitString, to: String) -> Result(Nil, String) =
-    "./file.mjs" "writeBits"
+@target(javascript)
+external fn do_write_bits(BitString, to: String) -> Result(Nil, String) =
+  "./file.mjs" "writeBits"
 
-  external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
-    "./file.mjs" "appendBits"
+@target(javascript)
+external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
+  "./file.mjs" "appendBits"
 
-  external fn do_is_directory(String) -> Bool =
-    "./file.mjs" "isDirectory"
+@target(javascript)
+external fn do_is_directory(String) -> Bool =
+  "./file.mjs" "isDirectory"
 
-  external fn do_list_contents(String) -> Result(List(String), FileError) =
-    "./file.mjs" "listContents"
+@target(javascript)
+external fn do_list_contents(String) -> Result(List(String), FileError) =
+  "./file.mjs" "listContents"
 
-  fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
-    result.map_error(
-      input,
-      fn(e) {
-        case e {
-          "EACCES" -> Eacces
-          "EAGAIN" -> Eagain
-          "EBADF" -> Ebadf
-          "EBADMSG" -> Ebadmsg
-          "EBUSY" -> Ebusy
-          "EDEADLK" -> Edeadlk
-          "EDEADLOCK" -> Edeadlock
-          "EDQUOT" -> Edquot
-          "EEXIST" -> Eexist
-          "EFAULT" -> Efault
-          "EFBIG" -> Efbig
-          "EFTYPE" -> Eftype
-          "EINTR" -> Eintr
-          "EINVAL" -> Einval
-          "EIO" -> Eio
-          "EISDIR" -> Eisdir
-          "ELOOP" -> Eloop
-          "EMFILE" -> Emfile
-          "EMLINK" -> Emlink
-          "EMULTIHOP" -> Emultihop
-          "ENAMETOOLONG" -> Enametoolong
-          "ENFILE" -> Enfile
-          "ENOBUFS" -> Enobufs
-          "ENODEV" -> Enodev
-          "ENOLCK" -> Enolck
-          "ENOLINK" -> Enolink
-          "ENOENT" -> Enoent
-          "ENOMEM" -> Enomem
-          "ENOSPC" -> Enospc
-          "ENOSR" -> Enosr
-          "ENOSTR" -> Enostr
-          "ENOSYS" -> Enosys
-          "ENOBLK" -> Enotblk
-          "ENODIR" -> Enotdir
-          "ENOTSUP" -> Enotsup
-          "ENXIO" -> Enxio
-          "EOPNOTSUPP" -> Eopnotsupp
-          "EOVERFLOW" -> Eoverflow
-          "EPERM" -> Eperm
-          "EPIPE" -> Epipe
-          "ERANGE" -> Erange
-          "EROFS" -> Erofs
-          "ESPIPE" -> Espipe
-          "ESRCH" -> Esrch
-          "ESTALE" -> Estale
-          "ETXTBSY" -> Etxtbsy
-          "EXDEV" -> Exdev
-          "NOTUTF8" -> NotUtf8
-          _ -> Unknown
-        }
-      },
-    )
-  }
-}
-
-if erlang {
-  import gleam/bit_string
-
-  external fn do_append_bits(BitString, to: String) -> Result(Nil, FileError) =
-    "gleam_erlang_ffi" "append_file"
-
-  external fn do_write_bits(BitString, to: String) -> Result(Nil, FileError) =
-    "gleam_erlang_ffi" "write_file"
-
-  external fn do_read_bits(from: String) -> Result(BitString, FileError) =
-    "gleam_erlang_ffi" "read_file"
-
-  external fn do_delete(String) -> Result(Nil, FileError) =
-    "gleam_erlang_ffi" "delete_file"
-
-  fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
-    content
-    |> bit_string.from_string
-    |> do_append_bits(filepath)
-  }
-
-  fn do_write(content: String, to filepath: String) -> Result(Nil, FileError) {
-    content
-    |> bit_string.from_string
-    |> do_write_bits(filepath)
-  }
-
-  fn do_read(from filepath: String) -> Result(String, FileError) {
-    case do_read_bits(filepath) {
-      Ok(bit_str) -> {
-        case bit_string.to_string(bit_str) {
-          Ok(str) -> Ok(str)
-          _ -> Error(NotUtf8)
-        }
+@target(javascript)
+fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
+  result.map_error(
+    input,
+    fn(e) {
+      case e {
+        "EACCES" -> Eacces
+        "EAGAIN" -> Eagain
+        "EBADF" -> Ebadf
+        "EBADMSG" -> Ebadmsg
+        "EBUSY" -> Ebusy
+        "EDEADLK" -> Edeadlk
+        "EDEADLOCK" -> Edeadlock
+        "EDQUOT" -> Edquot
+        "EEXIST" -> Eexist
+        "EFAULT" -> Efault
+        "EFBIG" -> Efbig
+        "EFTYPE" -> Eftype
+        "EINTR" -> Eintr
+        "EINVAL" -> Einval
+        "EIO" -> Eio
+        "EISDIR" -> Eisdir
+        "ELOOP" -> Eloop
+        "EMFILE" -> Emfile
+        "EMLINK" -> Emlink
+        "EMULTIHOP" -> Emultihop
+        "ENAMETOOLONG" -> Enametoolong
+        "ENFILE" -> Enfile
+        "ENOBUFS" -> Enobufs
+        "ENODEV" -> Enodev
+        "ENOLCK" -> Enolck
+        "ENOLINK" -> Enolink
+        "ENOENT" -> Enoent
+        "ENOMEM" -> Enomem
+        "ENOSPC" -> Enospc
+        "ENOSR" -> Enosr
+        "ENOSTR" -> Enostr
+        "ENOSYS" -> Enosys
+        "ENOBLK" -> Enotblk
+        "ENODIR" -> Enotdir
+        "ENOTSUP" -> Enotsup
+        "ENXIO" -> Enxio
+        "EOPNOTSUPP" -> Eopnotsupp
+        "EOVERFLOW" -> Eoverflow
+        "EPERM" -> Eperm
+        "EPIPE" -> Epipe
+        "ERANGE" -> Erange
+        "EROFS" -> Erofs
+        "ESPIPE" -> Espipe
+        "ESRCH" -> Esrch
+        "ESTALE" -> Estale
+        "ETXTBSY" -> Etxtbsy
+        "EXDEV" -> Exdev
+        "NOTUTF8" -> NotUtf8
+        _ -> Unknown
       }
-      Error(e) -> Error(e)
-    }
-  }
-
-  fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
-    input
-  }
-
-  external fn do_is_directory(String) -> Bool =
-    "filelib" "is_dir"
-
-  external fn do_list_contents(
-    directory: String,
-  ) -> Result(List(String), FileError) =
-    "gleam_erlang_ffi" "list_directory"
+    },
+  )
 }
+
+@target(erlang)
+import gleam/bit_string
+
+@target(erlang)
+external fn do_append_bits(BitString, to: String) -> Result(Nil, FileError) =
+  "gleam_erlang_ffi" "append_file"
+
+@target(erlang)
+external fn do_write_bits(BitString, to: String) -> Result(Nil, FileError) =
+  "gleam_erlang_ffi" "write_file"
+
+@target(erlang)
+external fn do_read_bits(from: String) -> Result(BitString, FileError) =
+  "gleam_erlang_ffi" "read_file"
+
+@target(erlang)
+external fn do_delete(String) -> Result(Nil, FileError) =
+  "gleam_erlang_ffi" "delete_file"
+
+@target(erlang)
+fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
+  content
+  |> bit_string.from_string
+  |> do_append_bits(filepath)
+}
+
+@target(erlang)
+fn do_write(content: String, to filepath: String) -> Result(Nil, FileError) {
+  content
+  |> bit_string.from_string
+  |> do_write_bits(filepath)
+}
+
+@target(erlang)
+fn do_read(from filepath: String) -> Result(String, FileError) {
+  case do_read_bits(filepath) {
+    Ok(bit_str) -> {
+      case bit_string.to_string(bit_str) {
+        Ok(str) -> Ok(str)
+        _ -> Error(NotUtf8)
+      }
+    }
+    Error(e) -> Error(e)
+  }
+}
+
+@target(erlang)
+fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
+  input
+}
+
+@target(erlang)
+external fn do_is_directory(String) -> Bool =
+  "filelib" "is_dir"
+
+@target(erlang)
+external fn do_list_contents(
+  directory: String,
+) -> Result(List(String), FileError) =
+  "gleam_erlang_ffi" "list_directory"
