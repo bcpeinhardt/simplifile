@@ -1,5 +1,8 @@
 # Changelog
 
+## v0.1.5 - 12 July 2023
+- Update to use new ffi syntax
+
 ## v0.1.4 - 21 June 2023
 - Add `is_directory` and `list_contents` functions for working with directories.
 
