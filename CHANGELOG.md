@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+- Add `make_directory` and `delete_directory` functions for working with directories.
+
 ## v0.1.5 - 12 July 2023
 - Update to use new ffi syntax
 
