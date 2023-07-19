@@ -204,6 +204,26 @@ pub fn is_directory(filepath: String) -> Bool {
   do_is_directory(filepath)
 }
 
+/// Make a directory at the provided filepath
+///
+/// ## Example
+/// ```gleam
+/// make_directory("./test")
+/// ```
+pub fn make_directory(filepath: String) -> Result(Nil, FileError) {
+  do_make_directory(filepath)
+}
+
+/// Delete a directory at the provided filepath
+///
+/// ## Example
+/// ```gleam
+/// delete_directory("./test")
+/// ```
+pub fn delete_directory(filepath: String) -> Result(Nil, FileError) {
+  do_delete_directory(filepath)
+}
+
 /// Lists the contents of a directory.
 /// The list contains directory and file names, and is not recursive.
 /// 
@@ -250,6 +270,14 @@ external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
 @target(javascript)
 external fn do_is_directory(String) -> Bool =
   "./file.mjs" "isDirectory"
+
+@target(javascript)
+external fn do_make_directory(String) -> Result(Nil, FileError) =
+  "./file.mjs" "makeDirectory"
+
+@target(javascript)
+external fn do_delete_directory(String) -> Result(Nil, FileError) =
+  "./file.mjs" "deleteDirectory"
 
 @target(javascript)
 external fn do_list_contents(String) -> Result(List(String), FileError) =
@@ -369,6 +397,14 @@ fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
 @target(erlang)
 external fn do_is_directory(String) -> Bool =
   "filelib" "is_dir"
+
+@target(erlang)
+external fn do_make_directory(directory: String) -> Result(Nil, FileError) =
+  "gleam_erlang_ffi" "make_directory"
+
+@target(erlang)
+external fn do_delete_directory(directory: String) -> Result(Nil, FileError) =
+  "gleam_erlang_ffi" "delete_directory"
 
 @target(erlang)
 external fn do_list_contents(

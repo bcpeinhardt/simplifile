@@ -2,7 +2,7 @@ import gleeunit
 import gleeunit/should
 import simplifile.{
   Enoent, append, append_bits, delete, is_directory, list_contents, read,
-  read_bits, write, write_bits,
+  read_bits, write, write_bits, make_directory, delete_directory,
 }
 import gleam/list
 
@@ -59,6 +59,12 @@ pub fn path_test() {
   let assert False = is_directory(filepath)
 
   let assert Ok(_) = delete(file_at: "./test/testfile.txt")
+}
+
+pub fn make_directory_test() {
+  let the_directory = "./test/some_created_dir"
+  let assert Ok(_) = make_directory(the_directory)
+  let assert Ok(_) = delete_directory(the_directory)
 }
 
 pub fn list_contents_test() {

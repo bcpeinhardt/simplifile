@@ -74,6 +74,24 @@ export function isDirectory(filepath) {
     return fs.existsSync(fp) && fs.lstatSync(fp).isDirectory();
 }
 
+export function makeDirectory(filepath) {
+    try {
+        fs.mkdirSync(path.normalize(filepath))
+        return new Ok(undefined)
+    } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}
+
+export function deleteDirectory(filepath) {
+    try {
+        fs.rmdirSync(path.normalize(filepath))
+        return new Ok(undefined)
+    } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}
+
 export function listContents(filepath) {
     try {
         const stuff = toList(fs.readdirSync(path.normalize(filepath)))
