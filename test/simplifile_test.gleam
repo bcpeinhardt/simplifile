@@ -64,6 +64,7 @@ pub fn path_test() {
 pub fn make_directory_test() {
   let the_directory = "./test/some_created_dir"
   let assert Ok(_) = make_directory(the_directory)
+  let assert Ok([]) = list_contents(the_directory)
   let assert Ok(_) = delete_directory(the_directory)
 }
 
