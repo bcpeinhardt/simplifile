@@ -1,8 +1,8 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, append, append_bits, delete, is_directory, list_contents, read,
-  read_bits, write, write_bits, make_directory, delete_directory,
+  Enoent, append, append_bits, delete, delete_directory, is_directory,
+  list_contents, make_directory, read, read_bits, write, write_bits,
 }
 import gleam/list
 
