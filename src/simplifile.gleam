@@ -1,4 +1,6 @@
 import gleam/bit_string
+@target(javascript)
+import gleam/result
 
 /// This type represents all of the reasons for why a file system operation could fail.
 ///
@@ -234,9 +236,6 @@ pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
 }
 
 @target(javascript)
-import gleam/result
-
-@target(javascript)
 fn do_read(from filepath: String) -> Result(String, String) {
   case do_read_bits(filepath) {
     Ok(bit_str) -> {
@@ -250,44 +249,53 @@ fn do_read(from filepath: String) -> Result(String, String) {
 }
 
 @target(javascript)
-external fn do_write(String, to: String) -> Result(Nil, String) =
-  "./file.mjs" "writeFile"
+fn do_write(content: String, to filepath: String) -> Result(Nil, String) {
+  content
+  |> bit_string.from_string
+  |> do_write_bits(to: filepath)
+}
 
 @target(javascript)
-external fn do_delete(file_at: String) -> Result(Nil, String) =
-  "./file.mjs" "deleteFile"
+@external(javascript, "./file.mjs", "deleteFile")
+fn do_delete(file_at: String) -> Result(Nil, String)
 
 @target(javascript)
-external fn do_append(String, to: String) -> Result(Nil, String) =
-  "./file.mjs" "appendFile"
+fn do_append(content: String, to filepath: String) -> Result(Nil, String) {
+  content
+  |> bit_string.from_string
+  |> do_append_bits(to: filepath)
+}
 
 @target(javascript)
-external fn do_read_bits(from: String) -> Result(BitString, String) =
-  "./file.mjs" "readBits"
+@external(javascript, "./file.mjs", "readBits")
+fn do_read_bits(from: String) -> Result(BitString, String)
 
 @target(javascript)
-external fn do_write_bits(BitString, to: String) -> Result(Nil, String) =
-  "./file.mjs" "writeBits"
+@external(javascript, "./file.mjs", "writeBits")
+fn do_write_bits(content: BitString, to filepath: String) -> Result(Nil, String)
 
 @target(javascript)
-external fn do_append_bits(BitString, to: String) -> Result(Nil, String) =
-  "./file.mjs" "appendBits"
+@external(javascript, "./file.mjs", "appendBits")
+fn do_append_bits(
+  content: BitString,
+  to filepath: String,
+) -> Result(Nil, String)
 
 @target(javascript)
-external fn do_is_directory(String) -> Bool =
-  "./file.mjs" "isDirectory"
+@external(javascript, "./file.mjs", "isDirectory")
+fn do_is_directory(filepath: String) -> Bool
 
 @target(javascript)
-external fn do_make_directory(String) -> Result(Nil, FileError) =
-  "./file.mjs" "makeDirectory"
+@external(javascript, "./file.mjs", "makeDirectory")
+fn do_make_directory(filepath: String) -> Result(Nil, FileError)
 
 @target(javascript)
-external fn do_delete_directory(String) -> Result(Nil, FileError) =
-  "./file.mjs" "deleteDirectory"
+@external(javascript, "./file.mjs", "deleteDirectory")
+fn do_delete_directory(filepath: String) -> Result(Nil, FileError)
 
 @target(javascript)
-external fn do_list_contents(String) -> Result(List(String), FileError) =
-  "./file.mjs" "listContents"
+@external(javascript, "./file.mjs", "listContents")
+fn do_list_contents(directory_path: String) -> Result(List(String), FileError)
 
 @target(javascript)
 fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
@@ -350,20 +358,26 @@ fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
 }
 
 @target(erlang)
-external fn do_append_bits(BitString, to: String) -> Result(Nil, FileError) =
-  "gleam_erlang_ffi" "append_file"
+@external(erlang, "gleam_erlang_ffi", "append_file")
+fn do_append_bits(
+  content: BitString,
+  to filepath: String,
+) -> Result(Nil, FileError)
 
 @target(erlang)
-external fn do_write_bits(BitString, to: String) -> Result(Nil, FileError) =
-  "gleam_erlang_ffi" "write_file"
+@external(erlang, "gleam_erlang_ffi", "write_file")
+fn do_write_bits(
+  content: BitString,
+  to filepath: String,
+) -> Result(Nil, FileError)
 
 @target(erlang)
-external fn do_read_bits(from: String) -> Result(BitString, FileError) =
-  "gleam_erlang_ffi" "read_file"
+@external(erlang, "gleam_erlang_ffi", "read_file")
+fn do_read_bits(from: String) -> Result(BitString, FileError)
 
 @target(erlang)
-external fn do_delete(String) -> Result(Nil, FileError) =
-  "gleam_erlang_ffi" "delete_file"
+@external(erlang, "gleam_erlang_ffi", "delete_file")
+fn do_delete(filepath: String) -> Result(Nil, FileError)
 
 @target(erlang)
 fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
@@ -398,19 +412,17 @@ fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
 }
 
 @target(erlang)
-external fn do_is_directory(String) -> Bool =
-  "filelib" "is_dir"
+@external(erlang, "filelib", "is_dir")
+fn do_is_directory(path: String) -> Bool
 
 @target(erlang)
-external fn do_make_directory(directory: String) -> Result(Nil, FileError) =
-  "gleam_erlang_ffi" "make_directory"
+@external(erlang, "gleam_erlang_ffi", "make_directory")
+fn do_make_directory(directory: String) -> Result(Nil, FileError)
 
 @target(erlang)
-external fn do_delete_directory(directory: String) -> Result(Nil, FileError) =
-  "gleam_erlang_ffi" "delete_directory"
+@external(erlang, "gleam_erlang_ffi", "delete_directory")
+fn do_delete_directory(directory: String) -> Result(Nil, FileError)
 
 @target(erlang)
-external fn do_list_contents(
-  directory: String,
-) -> Result(List(String), FileError) =
-  "gleam_erlang_ffi" "list_directory"
+@external(erlang, "gleam_erlang_ffi", "list_directory")
+fn do_list_contents(directory: String) -> Result(List(String), FileError)

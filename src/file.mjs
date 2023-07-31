@@ -11,15 +11,6 @@ export function readBits(filepath) {
     }
 }
 
-export function writeFile(contents, filepath) {
-    try {
-        fs.writeFileSync(path.normalize(filepath), contents)
-        return new Ok(undefined)
-    } catch(e) {
-        return new GError(stringifyError(e))
-    }
-}
-
 export function writeBits(contents, filepath) {
     try {
         fs.writeFileSync(path.normalize(filepath), contents.buffer)
@@ -32,15 +23,6 @@ export function writeBits(contents, filepath) {
 export function deleteFile(filepath) {
     try {
         fs.unlinkSync(path.normalize(filepath))
-        return new Ok(undefined)
-    } catch(e) {
-        return new GError(stringifyError(e))
-    }
-}
-
-export function appendFile(contents, filepath) {
-    try {
-        fs.appendFileSync(path.normalize(filepath), contents)
         return new Ok(undefined)
     } catch(e) {
         return new GError(stringifyError(e))

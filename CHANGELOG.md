@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.1.8 - 31 July 2023
+- Small refactor to remove js functions `writeFile` and `appendFile`
+
 ## v0.1.7 - 31 July 2023
 - Fix bug where `read` was incorrectly returning non utf8 content for string on 
     javascript target. Now returns correct `NonUtf8` error
