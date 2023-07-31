@@ -1,7 +1,7 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, append, append_bits, delete, delete_directory, is_directory,
+  Enoent, NotUtf8, append, append_bits, delete, delete_directory, is_directory,
   list_contents, make_directory, read, read_bits, write, write_bits,
 }
 import gleam/list
@@ -78,4 +78,13 @@ pub fn list_contents_test() {
 
   let assert Error(_) = list_contents(of: "./test/simplifile_test.gleam")
   let assert Error(_) = list_contents(of: "./test/i_dont_exist")
+}
+
+pub fn non_utf_test() {
+  let filepath = "./not_utf8.txt"
+  let assert Ok(_) =
+    <<0xC0>>
+    |> write_bits(to: filepath)
+  let assert Error(NotUtf8) = read(from: filepath)
+  let assert Ok(_) = delete(file_at: filepath)
 }

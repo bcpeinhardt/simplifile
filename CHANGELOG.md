@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.1.7 - 31 July 2023
+- Fix bug where `read` was incorrectly returning non utf8 content for string on 
+    javascript target. Now returns correct `NonUtf8` error
+
 ## v0.1.6 - 19 July 2023
 - Add `make_directory` and `delete_directory` functions for working with directories.
 

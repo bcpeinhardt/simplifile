@@ -1,3 +1,5 @@
+import gleam/bit_string
+
 /// This type represents all of the reasons for why a file system operation could fail.
 ///
 /// Most of these reasons are POSIX errors, which come from the operating system
@@ -112,11 +114,6 @@ pub type FileError {
 /// ```gleam
 /// let assert Ok(records) = read(from: "./users.csv")
 /// ```
-/// ### A note about utf8
-/// Currently on the erlang target, this function expects a utf8 string
-/// and returns a `NotUtf8` error if it reads a non utf8 string.
-/// On the javascript target, it will read any string.
-/// This behavior will probably change soon.
 ///
 pub fn read(from filepath: String) -> Result(String, FileError) {
   do_read(filepath)
@@ -240,8 +237,17 @@ pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
 import gleam/result
 
 @target(javascript)
-external fn do_read(from: String) -> Result(String, String) =
-  "./file.mjs" "readFile"
+fn do_read(from filepath: String) -> Result(String, String) {
+  case do_read_bits(filepath) {
+    Ok(bit_str) -> {
+      case bit_string.to_string(bit_str) {
+        Ok(str) -> Ok(str)
+        _ -> Error("NOTUTF8")
+      }
+    }
+    Error(e) -> Error(e)
+  }
+}
 
 @target(javascript)
 external fn do_write(String, to: String) -> Result(Nil, String) =
@@ -342,9 +348,6 @@ fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
     },
   )
 }
-
-@target(erlang)
-import gleam/bit_string
 
 @target(erlang)
 external fn do_append_bits(BitString, to: String) -> Result(Nil, FileError) =

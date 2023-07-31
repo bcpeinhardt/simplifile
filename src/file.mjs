@@ -2,15 +2,6 @@ import fs from "node:fs"
 import path from "node:path"
 import { BitString, Ok, Error as GError, toList} from "./gleam.mjs";
 
-export function readFile(filepath) {
-    try {
-        const contents = fs.readFileSync(path.normalize(filepath)).toString()
-        return new Ok(contents)
-    } catch(e) {
-        return new GError(stringifyError(e))
-    }
-}
-
 export function readBits(filepath) {
     try {
         const contents = fs.readFileSync(path.normalize(filepath))
