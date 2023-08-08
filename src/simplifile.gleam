@@ -1,6 +1,5 @@
 import gleam/bit_string
 import gleam/string
-
 @target(javascript)
 import gleam/result
 
@@ -214,7 +213,8 @@ pub fn is_directory(filepath: String) -> Bool {
 /// create_directory("./test")
 /// ```
 pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
-  do_make_directory(filepath) |> cast_error
+  do_make_directory(filepath)
+  |> cast_error
 }
 
 /// Lists the contents of a directory.
@@ -226,7 +226,8 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
 /// ```
 /// 
 pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
-  do_list_contents(directory) |> cast_error
+  do_list_contents(directory)
+  |> cast_error
 }
 
 /// Returns `True` if there is a file or directory at the given path, false otherwise
@@ -239,10 +240,14 @@ pub fn is_file(filepath: String) -> Bool {
 /// if the file already exists.
 /// 
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
-  case filepath |> is_file || filepath |> is_directory {
+  case
+    filepath
+    |> is_file || filepath
+    |> is_directory
+  {
     True -> Error(Eexist)
     False -> write_bits(<<>>, to: filepath)
-  } 
+  }
 }
 
 /// Recursively creates necessary directories for a given directory
@@ -250,11 +255,15 @@ pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
 /// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
 /// to pass only the path to the required directory.
 pub fn create_dir_all(dirpath: String) -> Result(Nil, FileError) {
-  let path = case dirpath |> string.ends_with("/") {
+  let path = case
+    dirpath
+    |> string.ends_with("/")
+  {
     True -> dirpath
     False -> dirpath <> "/"
   }
-  do_create_dir_all(path) |> cast_error
+  do_create_dir_all(path)
+  |> cast_error
 }
 
 @target(javascript)
