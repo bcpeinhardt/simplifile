@@ -1,4 +1,6 @@
 import gleam/bit_string
+import gleam/string
+
 @target(javascript)
 import gleam/result
 
@@ -133,14 +135,15 @@ pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
   |> cast_error
 }
 
-/// Delete a file at a given filepath
+/// Delete a file or directory at a given path. Performs a recursive
+/// delete on a directory.
 /// ## Example
 /// ```gleam
 /// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
 /// ```
 ///
-pub fn delete(file_at filepath: String) -> Result(Nil, FileError) {
-  do_delete(filepath)
+pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError) {
+  do_delete(path)
   |> cast_error
 }
 
@@ -203,24 +206,15 @@ pub fn is_directory(filepath: String) -> Bool {
   do_is_directory(filepath)
 }
 
-/// Make a directory at the provided filepath
+/// Create a directory at the provided filepath. Returns an error if
+/// the directory already exists.
 ///
 /// ## Example
 /// ```gleam
-/// make_directory("./test")
+/// create_directory("./test")
 /// ```
-pub fn make_directory(filepath: String) -> Result(Nil, FileError) {
-  do_make_directory(filepath)
-}
-
-/// Delete a directory at the provided filepath
-///
-/// ## Example
-/// ```gleam
-/// delete_directory("./test")
-/// ```
-pub fn delete_directory(filepath: String) -> Result(Nil, FileError) {
-  do_delete_directory(filepath)
+pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
+  do_make_directory(filepath) |> cast_error
 }
 
 /// Lists the contents of a directory.
@@ -232,7 +226,35 @@ pub fn delete_directory(filepath: String) -> Result(Nil, FileError) {
 /// ```
 /// 
 pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
-  do_list_contents(directory)
+  do_list_contents(directory) |> cast_error
+}
+
+/// Returns `True` if there is a file or directory at the given path, false otherwise
+/// 
+pub fn is_file(filepath: String) -> Bool {
+  do_is_file(filepath)
+}
+
+/// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
+/// if the file already exists.
+/// 
+pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
+  case filepath |> is_file || filepath |> is_directory {
+    True -> Error(Eexist)
+    False -> write_bits(<<>>, to: filepath)
+  } 
+}
+
+/// Recursively creates necessary directories for a given directory
+/// path. Note that if you pass a path that "looks like" a file, i.e.
+/// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
+/// to pass only the path to the required directory.
+pub fn create_dir_all(dirpath: String) -> Result(Nil, FileError) {
+  let path = case dirpath |> string.ends_with("/") {
+    True -> dirpath
+    False -> dirpath <> "/"
+  }
+  do_create_dir_all(path) |> cast_error
 }
 
 @target(javascript)
@@ -256,8 +278,8 @@ fn do_write(content: String, to filepath: String) -> Result(Nil, String) {
 }
 
 @target(javascript)
-@external(javascript, "./file.mjs", "deleteFile")
-fn do_delete(file_at: String) -> Result(Nil, String)
+@external(javascript, "./simplifile_js.mjs", "deleteFileOrDirRecursive")
+fn do_delete(file_or_dir_at: String) -> Result(Nil, String)
 
 @target(javascript)
 fn do_append(content: String, to filepath: String) -> Result(Nil, String) {
@@ -267,35 +289,31 @@ fn do_append(content: String, to filepath: String) -> Result(Nil, String) {
 }
 
 @target(javascript)
-@external(javascript, "./file.mjs", "readBits")
+@external(javascript, "./simplifile_js.mjs", "readBits")
 fn do_read_bits(from: String) -> Result(BitString, String)
 
 @target(javascript)
-@external(javascript, "./file.mjs", "writeBits")
+@external(javascript, "./simplifile_js.mjs", "writeBits")
 fn do_write_bits(content: BitString, to filepath: String) -> Result(Nil, String)
 
 @target(javascript)
-@external(javascript, "./file.mjs", "appendBits")
+@external(javascript, "./simplifile_js.mjs", "appendBits")
 fn do_append_bits(
   content: BitString,
   to filepath: String,
 ) -> Result(Nil, String)
 
 @target(javascript)
-@external(javascript, "./file.mjs", "isDirectory")
+@external(javascript, "./simplifile_js.mjs", "isDirectory")
 fn do_is_directory(filepath: String) -> Bool
 
 @target(javascript)
-@external(javascript, "./file.mjs", "makeDirectory")
-fn do_make_directory(filepath: String) -> Result(Nil, FileError)
+@external(javascript, "./simplifile_js.mjs", "makeDirectory")
+fn do_make_directory(filepath: String) -> Result(Nil, String)
 
 @target(javascript)
-@external(javascript, "./file.mjs", "deleteDirectory")
-fn do_delete_directory(filepath: String) -> Result(Nil, FileError)
-
-@target(javascript)
-@external(javascript, "./file.mjs", "listContents")
-fn do_list_contents(directory_path: String) -> Result(List(String), FileError)
+@external(javascript, "./simplifile_js.mjs", "listContents")
+fn do_list_contents(directory_path: String) -> Result(List(String), String)
 
 @target(javascript)
 fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
@@ -358,26 +376,26 @@ fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
 }
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "append_file")
+@external(erlang, "simplifile_erl", "append_file")
 fn do_append_bits(
   content: BitString,
   to filepath: String,
 ) -> Result(Nil, FileError)
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "write_file")
+@external(erlang, "simplifile_erl", "write_file")
 fn do_write_bits(
   content: BitString,
   to filepath: String,
 ) -> Result(Nil, FileError)
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "read_file")
+@external(erlang, "simplifile_erl", "read_file")
 fn do_read_bits(from: String) -> Result(BitString, FileError)
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "delete_file")
-fn do_delete(filepath: String) -> Result(Nil, FileError)
+@external(erlang, "simplifile_erl", "recursive_delete")
+fn do_delete(file_or_dir_at: String) -> Result(Nil, FileError)
 
 @target(erlang)
 fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
@@ -416,13 +434,21 @@ fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
 fn do_is_directory(path: String) -> Bool
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "make_directory")
+@external(erlang, "simplifile_erl", "make_directory")
 fn do_make_directory(directory: String) -> Result(Nil, FileError)
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "delete_directory")
-fn do_delete_directory(directory: String) -> Result(Nil, FileError)
+@external(erlang, "simplifile_erl", "list_directory")
+fn do_list_contents(directory: String) -> Result(List(String), FileError)
+
+@external(erlang, "simplifile_erl", "is_file")
+@external(javascript, "./simplifile_js.mjs", "isFile")
+fn do_is_file(filepath: String) -> Bool
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "createDirAll")
+fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
 
 @target(erlang)
-@external(erlang, "gleam_erlang_ffi", "list_directory")
-fn do_list_contents(directory: String) -> Result(List(String), FileError)
+@external(erlang, "simplifile_erl", "create_dir_all")
+fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)

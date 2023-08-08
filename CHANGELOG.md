@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v0.1.9 - 8 August 2023
+- Add functions `create_dir_all`, `create_file`, and `is_file`.
+- Remove function `delete_directory`. The `delete` function now deletes files
+  and recursively deletes directories.
+
 ## v0.1.8 - 31 July 2023
 - Small refactor to remove js functions `writeFile` and `appendFile`
 

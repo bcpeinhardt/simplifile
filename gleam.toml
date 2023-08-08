@@ -1,5 +1,5 @@
 name = "simplifile"
-version = "0.1.8"
+version = "0.1.9"
 description = "Basic file operations that work on all targets"
 
 # Fill out these fields if you intend to generate HTML documentation or publish

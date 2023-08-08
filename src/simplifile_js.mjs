@@ -20,15 +20,6 @@ export function writeBits(contents, filepath) {
     }
 }
 
-export function deleteFile(filepath) {
-    try {
-        fs.unlinkSync(path.normalize(filepath))
-        return new Ok(undefined)
-    } catch(e) {
-        return new GError(stringifyError(e))
-    }
-}
-
 export function appendBits(contents, filepath) {
     try {
         fs.appendFileSync(path.normalize(filepath), contents.buffer)
@@ -40,6 +31,11 @@ export function appendBits(contents, filepath) {
 
 function stringifyError(e) {
     return e.code
+}
+
+export function isFile(filepath) {
+    let fp = path.normalize(filepath)
+    return fs.existsSync(fp) && fs.lstatSync(fp).isFile();
 }
 
 export function isDirectory(filepath) {
@@ -56,11 +52,25 @@ export function makeDirectory(filepath) {
     }
 }
 
-export function deleteDirectory(filepath) {
+export function createDirAll(filepath) {
     try {
-        fs.rmdirSync(path.normalize(filepath))
+        fs.mkdirSync(filepath, { recursive: true })
         return new Ok(undefined)
     } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}
+
+export function deleteFileOrDirRecursive(fileOrDirPath) {
+    try {
+        if (isDirectory(fileOrDirPath)) {
+            fs.rmdirSync(path.normalize(fileOrDirPath), { recursive: true })
+        } else {
+            fs.unlinkSync(path.normalize(fileOrDirPath))
+        }
+        return new Ok(undefined)
+    } catch (e) {
+        console.log(e)
         return new GError(stringifyError(e))
     }
 }
