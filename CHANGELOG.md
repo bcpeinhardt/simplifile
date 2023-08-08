@@ -6,6 +6,7 @@
 - Add functions `create_dir_all`, `create_file`, and `is_file`.
 - Remove function `delete_directory`. The `delete` function now deletes files
   and recursively deletes directories.
+- `make_directory` is now called `create_directory` to be consistent with `create_file`.
 
 ## v0.1.8 - 31 July 2023
 - Small refactor to remove js functions `writeFile` and `appendFile`
