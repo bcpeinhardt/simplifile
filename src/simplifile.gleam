@@ -230,7 +230,7 @@ pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
   |> cast_error
 }
 
-/// Returns `True` if there is a file or directory at the given path, false otherwise
+/// Returns `True` if there is a file at the given path, false otherwise.
 /// 
 pub fn is_file(filepath: String) -> Bool {
   do_is_file(filepath)
@@ -254,7 +254,7 @@ pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
 /// path. Note that if you pass a path that "looks like" a file, i.e.
 /// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
 /// to pass only the path to the required directory.
-pub fn create_dir_all(dirpath: String) -> Result(Nil, FileError) {
+pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
   let path = case
     dirpath
     |> string.ends_with("/")

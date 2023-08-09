@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.1.10 - 9 August 2023
+- Change `creat_dir_all` to `create_directory_all`
+
 ## v0.1.9 - 8 August 2023
 - Add functions `create_dir_all`, `create_file`, and `is_file`.
 - Remove function `delete_directory`. The `delete` function now deletes files
