@@ -83,3 +83,21 @@ export function listContents(filepath) {
         return new GError(stringifyError(e))
     }
 }
+
+export function copyFile(srcpath, destpath) {
+    try {
+        fs.copyFileSync(path.normalize(srcpath), path.normalize(destpath))
+        return new Ok(undefined)
+    } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}
+
+export function renameFile(srcpath, destpath) {
+    try {
+        fs.renameSync(path.normalize(srcpath), path.normalize(destpath))
+        return new Ok(undefined)
+    } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}

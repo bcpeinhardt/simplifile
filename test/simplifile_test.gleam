@@ -1,9 +1,9 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, NotUtf8, append, append_bits, create_directory, create_directory_all,
-  delete, is_directory, is_file, list_contents, read, read_bits, write,
-  write_bits,
+  Enoent, NotUtf8, append, append_bits, copy_file, create_directory,
+  create_directory_all, delete, is_directory, is_file, list_contents, read,
+  read_bits, rename_file, write, write_bits,
 }
 import gleam/list
 
@@ -131,4 +131,22 @@ pub fn create_all_test() {
   let assert True = is_directory("./test/level1")
   let assert True = is_directory("./test/level1/level2")
   let assert Ok(_) = delete("./test/level1")
+}
+
+pub fn copy_test() {
+  let assert Ok(_) = write("Hello", to: "./test/to_be_copied.txt")
+  let assert Ok(Nil) =
+    copy_file(at: "./test/to_be_copied.txt", to: "./test/copied.txt")
+  let assert Ok(_) = delete(file_or_dir_at: "./test/to_be_copied.txt")
+  let assert Ok("Hello") = read("./test/copied.txt")
+  let assert Ok(_) = delete("./test/copied.txt")
+}
+
+pub fn rename_test() {
+  let assert Ok(_) = write("Hello", to: "./test/to_be_renamed.txt")
+  let assert Ok(Nil) =
+    rename_file("./test/to_be_renamed.txt", to: "./test/renamed.txt")
+  let assert False = is_file("./test/to_be_renamed.txt")
+  let assert True = is_file("./test/renamed.txt")
+  let assert Ok(_) = delete("./test/renamed.txt")
 }

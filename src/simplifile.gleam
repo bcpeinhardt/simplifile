@@ -1,6 +1,5 @@
 import gleam/bit_string
 import gleam/string
-@target(javascript)
 import gleam/result
 
 /// This type represents all of the reasons for why a file system operation could fail.
@@ -266,6 +265,21 @@ pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
   |> cast_error
 }
 
+/// Copy a file at a given path to another path.
+/// Note: destination should include the filename, not just the directory
+pub fn copy_file(at src: String, to dest: String) -> Result(Nil, FileError) {
+  do_copy_file(src, dest)
+  |> result.replace(Nil)
+  |> cast_error
+}
+
+/// Rename a file at a given path to another path.
+/// Note: destination should include the filename, not just the directory
+pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError) {
+  do_rename_file(src, dest)
+  |> cast_error
+}
+
 @target(javascript)
 fn do_read(from filepath: String) -> Result(String, String) {
   case do_read_bits(filepath) {
@@ -321,8 +335,20 @@ fn do_is_directory(filepath: String) -> Bool
 fn do_make_directory(filepath: String) -> Result(Nil, String)
 
 @target(javascript)
+@external(javascript, "./simplifile_js.mjs", "createDirAll")
+fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
+
+@target(javascript)
 @external(javascript, "./simplifile_js.mjs", "listContents")
 fn do_list_contents(directory_path: String) -> Result(List(String), String)
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "copyFile")
+fn do_copy_file(at: String, to: String) -> Result(Nil, String)
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "renameFile")
+fn do_rename_file(at: String, to: String) -> Result(Nil, String)
 
 @target(javascript)
 fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
@@ -454,10 +480,14 @@ fn do_list_contents(directory: String) -> Result(List(String), FileError)
 @external(javascript, "./simplifile_js.mjs", "isFile")
 fn do_is_file(filepath: String) -> Bool
 
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "createDirAll")
-fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
-
 @target(erlang)
 @external(erlang, "simplifile_erl", "create_dir_all")
 fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)
+
+@target(erlang)
+@external(erlang, "file", "copy")
+fn do_copy_file(src: String, dest: String) -> Result(Int, FileError)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "rename_file")
+fn do_rename_file(src: String, dest: String) -> Result(Nil, FileError)

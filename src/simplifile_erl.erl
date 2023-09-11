@@ -2,7 +2,7 @@
 -export([
     read_file/1,
     append_file/2, write_file/2, delete_file/1, delete_directory/1, recursive_delete/1,
-    list_directory/1, make_directory/1, is_file/1, create_dir_all/1
+    list_directory/1, make_directory/1, is_file/1, create_dir_all/1, rename_file/2
 ]).
 
 -define(is_posix_error(Error),
@@ -65,3 +65,6 @@ is_file(Filename) ->
 
 create_dir_all(Filename) ->
     posix_result(filelib:ensure_dir(Filename)).
+
+rename_file(Source, Destination) ->
+    posix_result(file:rename(Source, Destination)).
