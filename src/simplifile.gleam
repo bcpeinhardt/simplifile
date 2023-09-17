@@ -1,6 +1,7 @@
 import gleam/bit_string
 import gleam/string
 import gleam/result
+import gleam/list
 
 /// This type represents all of the reasons for why a file system operation could fail.
 ///
@@ -278,6 +279,53 @@ pub fn copy_file(at src: String, to dest: String) -> Result(Nil, FileError) {
 pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError) {
   do_rename_file(src, dest)
   |> cast_error
+}
+
+/// Copy a directory recursively
+pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError) {
+  // Erlang does not provide a built in `copy_dir` function, 
+  // and Deno doesn't support Node's `fs.cpSync`, so we'll just roll 
+  // our own for now.
+
+  // Create the target directory
+  use _ <- result.try(create_directory(dest))
+
+  // Iterate over the segments of the file
+  use segments <- result.try(list_contents(src))
+  segments
+  |> list.each(fn(segment) {
+    let src_path = src <> "/" <> segment
+    let dest_path = dest <> "/" <> segment
+
+    case is_file(src_path), is_directory(src_path) {
+      True, False -> {
+        // For a file, create the file in the new directory
+        use content <- result.try(read_bits(src_path))
+        content
+        |> write_bits(dest_path)
+      }
+      False, True -> {
+        // For a directory, recurse
+        copy_directory(src_path, dest_path)
+      }
+      _, _ -> {
+        // This should be unreachable. The src_path can't be both a file
+        // and a directory, and it's definitely one of the two because it's
+        // coming from list_contents
+        panic as "unreachable"
+      }
+    }
+  })
+  Ok(Nil)
+}
+
+/// Copy a directory recursively and then delete the old one.
+pub fn rename_directory(
+  at src: String,
+  to dest: String,
+) -> Result(Nil, FileError) {
+  use _ <- result.try(copy_directory(src, dest))
+  delete(src)
 }
 
 @target(javascript)

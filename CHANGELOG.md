@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.1.12 - 17 September 2023
+- Add `copy_directory` and `rename_directory` functions
+
 ## v0.1.11 - 11 September 2023
 - Add `copy_file` and `rename_file` functions
 
