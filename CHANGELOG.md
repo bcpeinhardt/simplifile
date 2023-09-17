@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.1.13 - 17 September 2023
+- copy and rename directory functions perform a create_directory_all
+
 ## v0.1.12 - 17 September 2023
 - Add `copy_directory` and `rename_directory` functions
 

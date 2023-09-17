@@ -286,10 +286,11 @@ pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError)
   // Erlang does not provide a built in `copy_dir` function, 
   // and Deno doesn't support Node's `fs.cpSync`, so we'll just roll 
   // our own for now.
+  use _ <- result.try(create_directory_all(dest))
+  do_copy_directory(src, dest)
+}
 
-  // Create the target directory
-  use _ <- result.try(create_directory(dest))
-
+fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
   // Iterate over the segments of the file
   use segments <- result.try(list_contents(src))
   segments
@@ -305,8 +306,9 @@ pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError)
         |> write_bits(dest_path)
       }
       False, True -> {
-        // For a directory, recurse
-        copy_directory(src_path, dest_path)
+        // Create the target directory and recurs
+        use _ <- result.try(create_directory(dest_path))
+        do_copy_directory(src_path, dest_path)
       }
       _, _ -> {
         // This should be unreachable. The src_path can't be both a file

@@ -3,7 +3,8 @@ import gleeunit/should
 import simplifile.{
   Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
   create_directory, create_directory_all, delete, is_directory, is_file,
-  list_contents, read, read_bits, rename_file, write, write_bits, rename_directory
+  list_contents, read, read_bits, rename_directory, rename_file, write,
+  write_bits,
 }
 import gleam/list
 
@@ -197,4 +198,29 @@ pub fn rename_directory_test() {
   // Cleanup
   let assert Error(_) = read("./test/to_be_copied_dir")
   let assert Ok(_) = delete("./test/copied_dir")
+}
+
+pub fn copy_directory_nested_needs_create_all_test() {
+  // Make directory for copying
+  let assert Ok(_) = create_directory("./test/to_be_copied_dir")
+  let assert Ok(_) = create_directory("./test/to_be_copied_dir/nested_dir")
+  let assert Ok(_) =
+    "Hello"
+    |> write("./test/to_be_copied_dir/file.txt")
+  let assert Ok(_) =
+    "Hello"
+    |> write("./test/to_be_copied_dir/nested_dir/file.txt")
+
+  // Copy the directory
+  let assert Ok(_) =
+    copy_directory("./test/to_be_copied_dir", to: "./test/nest/nest/copied_dir")
+
+  // Assert the contents are correct
+  let assert Ok("Hello") = read("./test/nest/nest/copied_dir/file.txt")
+  let assert Ok("Hello") =
+    read("./test/nest/nest/copied_dir/nested_dir/file.txt")
+
+  // Cleanup
+  let assert Ok(_) = delete("./test/to_be_copied_dir")
+  let assert Ok(_) = delete("./test/nest")
 }
