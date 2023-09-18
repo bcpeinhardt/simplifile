@@ -136,6 +136,7 @@ pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
 
 /// Delete a file or directory at a given path. Performs a recursive
 /// delete on a directory.
+/// Throws an error if the path does not exist.
 /// ## Example
 /// ```gleam
 /// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
@@ -144,6 +145,23 @@ pub fn write(contents: String, to filepath: String) -> Result(Nil, FileError) {
 pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError) {
   do_delete(path)
   |> cast_error
+}
+
+/// Delete all files/directories specified in a list of paths.
+/// Recursively deletes provided directories.
+/// Does not return an error if one or more of the provided paths 
+/// do not exist. 
+/// 
+pub fn delete_all(paths paths: List(String)) -> Result(Nil, FileError) {
+  case paths {
+    [] -> Ok(Nil)
+    [path, ..rest] -> {
+      case delete(path) {
+        Ok(Nil) | Error(Enoent) -> delete_all(rest)
+        e -> e
+      }
+    }
+  }
 }
 
 /// Append a string to the contents of a file at the given path

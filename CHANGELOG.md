@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.1.14 - 18 September 2023
+- added `delete_all` which takes a list of paths to call delete on
+
 ## v0.1.13 - 17 September 2023
 - copy and rename directory functions perform a create_directory_all
 

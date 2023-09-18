@@ -64,13 +64,12 @@ export function createDirAll(filepath) {
 export function deleteFileOrDirRecursive(fileOrDirPath) {
     try {
         if (isDirectory(fileOrDirPath)) {
-            fs.rmdirSync(path.normalize(fileOrDirPath), { recursive: true })
+            fs.rmSync(path.normalize(fileOrDirPath), { recursive: true })
         } else {
             fs.unlinkSync(path.normalize(fileOrDirPath))
         }
         return new Ok(undefined)
     } catch (e) {
-        console.log(e)
         return new GError(stringifyError(e))
     }
 }

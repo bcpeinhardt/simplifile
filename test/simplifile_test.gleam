@@ -2,11 +2,12 @@ import gleeunit
 import gleeunit/should
 import simplifile.{
   Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
-  create_directory, create_directory_all, delete, is_directory, is_file,
-  list_contents, read, read_bits, rename_directory, rename_file, write,
+  create_directory, create_directory_all, delete, delete_all, is_directory,
+  is_file, list_contents, read, read_bits, rename_directory, rename_file, write,
   write_bits,
 }
 import gleam/list
+import gleam/int
 
 pub fn main() {
   gleeunit.main()
@@ -223,4 +224,25 @@ pub fn copy_directory_nested_needs_create_all_test() {
   // Cleanup
   let assert Ok(_) = delete("./test/to_be_copied_dir")
   let assert Ok(_) = delete("./test/nest")
+}
+
+pub fn delete_test() {
+  // Basic delete
+  let assert Ok(_) = write("Hello", to: "./test/existing_file.txt")
+  let assert Ok(_) = delete("./test/existing_file.txt")
+
+  // Deleting a file that doesn't exist throws an error
+  let assert Error(Enoent) = delete("./idontexist")
+}
+
+pub fn delete_all_test() {
+  list.each(
+    [1, 2, 3, 4, 5],
+    fn(item) { write("Hello", to: "./test" <> int.to_string(item) <> ".txt") },
+  )
+  let assert Ok(_) =
+    delete_all([
+      "./test1.txt", "./test2.txt", "./test3.txt", "./test4.txt", "./test5.txt",
+      "./idontexist",
+    ])
 }
