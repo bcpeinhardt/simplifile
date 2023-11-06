@@ -1,5 +1,5 @@
 name = "simplifile"
-version = "0.1.14"
+version = "0.2.0"
 description = "Basic file operations that work on all targets"
 
 licences = ["Apache-2.0"]

@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v0.2.0 - 6 November 2023
 - Updated for Gleam v0.32.
 
 ## v0.1.14 - 18 September 2023
