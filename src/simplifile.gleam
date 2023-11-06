@@ -1,4 +1,4 @@
-import gleam/bit_string
+import gleam/bit_array
 import gleam/string
 import gleam/result
 import gleam/list
@@ -181,7 +181,7 @@ pub fn append(contents: String, to filepath: String) -> Result(Nil, FileError) {
 /// let assert Ok(records) = read_bits(from: "./users.csv")
 /// ```
 ///
-pub fn read_bits(from filepath: String) -> Result(BitString, FileError) {
+pub fn read_bits(from filepath: String) -> Result(BitArray, FileError) {
   do_read_bits(filepath)
   |> cast_error
 }
@@ -192,10 +192,7 @@ pub fn read_bits(from filepath: String) -> Result(BitString, FileError) {
 /// let assert Ok(Nil) = write_bits(<<"Hello, World!":utf8>>, to: "./hello_world.txt")
 /// ```
 ///
-pub fn write_bits(
-  bits: BitString,
-  to filepath: String,
-) -> Result(Nil, FileError) {
+pub fn write_bits(bits: BitArray, to filepath: String) -> Result(Nil, FileError) {
   do_write_bits(bits, filepath)
   |> cast_error
 }
@@ -207,7 +204,7 @@ pub fn write_bits(
 /// ```
 ///
 pub fn append_bits(
-  bits: BitString,
+  bits: BitArray,
   to filepath: String,
 ) -> Result(Nil, FileError) {
   do_append_bits(bits, filepath)
@@ -351,8 +348,8 @@ pub fn rename_directory(
 @target(javascript)
 fn do_read(from filepath: String) -> Result(String, String) {
   case do_read_bits(filepath) {
-    Ok(bit_str) -> {
-      case bit_string.to_string(bit_str) {
+    Ok(bits) -> {
+      case bit_array.to_string(bits) {
         Ok(str) -> Ok(str)
         _ -> Error("NOTUTF8")
       }
@@ -364,7 +361,7 @@ fn do_read(from filepath: String) -> Result(String, String) {
 @target(javascript)
 fn do_write(content: String, to filepath: String) -> Result(Nil, String) {
   content
-  |> bit_string.from_string
+  |> bit_array.from_string
   |> do_write_bits(to: filepath)
 }
 
@@ -375,24 +372,21 @@ fn do_delete(file_or_dir_at: String) -> Result(Nil, String)
 @target(javascript)
 fn do_append(content: String, to filepath: String) -> Result(Nil, String) {
   content
-  |> bit_string.from_string
+  |> bit_array.from_string
   |> do_append_bits(to: filepath)
 }
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "readBits")
-fn do_read_bits(from: String) -> Result(BitString, String)
+fn do_read_bits(from: String) -> Result(BitArray, String)
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "writeBits")
-fn do_write_bits(content: BitString, to filepath: String) -> Result(Nil, String)
+fn do_write_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "appendBits")
-fn do_append_bits(
-  content: BitString,
-  to filepath: String,
-) -> Result(Nil, String)
+fn do_append_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "isDirectory")
@@ -481,20 +475,20 @@ fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
 @target(erlang)
 @external(erlang, "simplifile_erl", "append_file")
 fn do_append_bits(
-  content: BitString,
+  content: BitArray,
   to filepath: String,
 ) -> Result(Nil, FileError)
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "write_file")
 fn do_write_bits(
-  content: BitString,
+  content: BitArray,
   to filepath: String,
 ) -> Result(Nil, FileError)
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "read_file")
-fn do_read_bits(from: String) -> Result(BitString, FileError)
+fn do_read_bits(from: String) -> Result(BitArray, FileError)
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "recursive_delete")
@@ -503,22 +497,22 @@ fn do_delete(file_or_dir_at: String) -> Result(Nil, FileError)
 @target(erlang)
 fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
   content
-  |> bit_string.from_string
+  |> bit_array.from_string
   |> do_append_bits(filepath)
 }
 
 @target(erlang)
 fn do_write(content: String, to filepath: String) -> Result(Nil, FileError) {
   content
-  |> bit_string.from_string
+  |> bit_array.from_string
   |> do_write_bits(filepath)
 }
 
 @target(erlang)
 fn do_read(from filepath: String) -> Result(String, FileError) {
   case do_read_bits(filepath) {
-    Ok(bit_str) -> {
-      case bit_string.to_string(bit_str) {
+    Ok(bits) -> {
+      case bit_array.to_string(bits) {
         Ok(str) -> Ok(str)
         _ -> Error(NotUtf8)
       }

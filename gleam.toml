@@ -2,11 +2,9 @@ name = "simplifile"
 version = "0.1.14"
 description = "Basic file operations that work on all targets"
 
-# Fill out these fields if you intend to generate HTML documentation or publish
-# your project to the Hex package manager.
-#
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "bcpeinhardt", repo = "simplifile" }
+gleam = ">= 0.32.2"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 [javascript.deno]
@@ -16,4 +14,4 @@ allow_all = true
 gleam_stdlib = "~> 0.29"
 
 [dev-dependencies]
-gleeunit = "~> 0.10"
+gleeunit = "~> 1.0"

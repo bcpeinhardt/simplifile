@@ -10,11 +10,13 @@ import gleam/list
 import gleam/int
 
 pub fn main() {
+  let assert Ok(_) = delete_all(["tmp"])
+  let assert Ok(_) = create_directory("tmp")
   gleeunit.main()
 }
 
 pub fn main_test() {
-  let filepath = "./test/hello.txt"
+  let filepath = "./tmp/hello.txt"
   let assert Ok(_) =
     "Hello, World"
     |> write(to: filepath)
@@ -27,7 +29,7 @@ pub fn main_test() {
 }
 
 pub fn bits_test() {
-  let filepath = "./test/hello_bits.txt"
+  let filepath = "./tmp/hello_bits.txt"
   let assert Ok(_) =
     <<"Hello, World":utf8>>
     |> write_bits(to: filepath)
@@ -43,25 +45,25 @@ pub fn bits_test() {
 
 pub fn enoent_test() {
   // ENOENT
-  let filepath = "./test/does_not_exist.txt"
+  let filepath = "./tmp/does_not_exist.txt"
   let assert Error(e) = read(from: filepath)
   e
   |> should.equal(Enoent)
 }
 
 pub fn path_test() {
-  let filepath = "./test/path_test.txt"
+  let filepath = "./tmp/path_test.txt"
   let assert Ok(_) =
     "Hello"
     |> write(to: filepath)
 
   let assert False = is_directory(filepath)
 
-  let assert Ok(_) = delete(file_or_dir_at: "./test/path_test.txt")
+  let assert Ok(_) = delete(file_or_dir_at: "./tmp/path_test.txt")
 }
 
 pub fn make_directory_test() {
-  let the_directory = "./test/some_created_dir"
+  let the_directory = "./tmp/some_created_dir"
   let assert Ok(_) = create_directory(the_directory)
   let assert Error(_) = create_directory(the_directory)
   let assert Error(_) = create_directory("./test/simplifile_test.gleam")
@@ -71,7 +73,7 @@ pub fn make_directory_test() {
 
 pub fn list_contents_test() {
   // Test setup
-  let test_dir = "./test/test_dir"
+  let test_dir = "./tmp/test_dir"
   let assert Ok(_) = create_directory(test_dir)
   let assert True = is_directory(test_dir)
   let assert Ok(_) =
@@ -90,14 +92,14 @@ pub fn list_contents_test() {
 
   // Verify errors on invalid uses
   let assert Error(_) = list_contents(of: "./test/simplifile_test.gleam")
-  let assert Error(_) = list_contents(of: "./test/i_dont_exist")
+  let assert Error(_) = list_contents(of: "./tmp/i_dont_exist")
 
   // Cleanup
   let assert Ok(_) = delete(test_dir)
 }
 
 pub fn non_utf_test() {
-  let filepath = "./test/not_utf8.txt"
+  let filepath = "./tmp/not_utf8.txt"
   let assert Ok(_) =
     <<0xC0>>
     |> write_bits(to: filepath)
@@ -107,7 +109,7 @@ pub fn non_utf_test() {
 
 pub fn is_file_test() {
   // Basic usage
-  let filepath = "./test/is_file_test.txt"
+  let filepath = "./tmp/is_file_test.txt"
   let assert False = is_file(filepath)
   let assert Ok(_) =
     ""
@@ -117,11 +119,11 @@ pub fn is_file_test() {
   let assert False = is_file(filepath)
 
   // A directory is not a file
-  let assert False = is_file("./test")
+  let assert False = is_file("./tmp")
 }
 
 pub fn is_directory_test() {
-  let assert True = is_directory("./test")
+  let assert True = is_directory("./tmp")
   let assert False = is_directory("./does_not_exist")
 
   // A file is not a directory
@@ -129,120 +131,118 @@ pub fn is_directory_test() {
 }
 
 pub fn create_all_test() {
-  let assert Ok(_) = create_directory_all("./test/level1/level2")
-  let assert True = is_directory("./test/level1")
-  let assert True = is_directory("./test/level1/level2")
-  let assert Ok(_) = delete("./test/level1")
+  let assert Ok(_) = create_directory_all("./tmp/level1/level2")
+  let assert True = is_directory("./tmp/level1")
+  let assert True = is_directory("./tmp/level1/level2")
+  let assert Ok(_) = delete("./tmp/level1")
 }
 
 pub fn copy_test() {
-  let assert Ok(_) = write("Hello", to: "./test/to_be_copied.txt")
+  let assert Ok(_) = write("Hello", to: "./tmp/to_be_copied.txt")
   let assert Ok(Nil) =
-    copy_file(at: "./test/to_be_copied.txt", to: "./test/copied.txt")
-  let assert Ok(_) = delete(file_or_dir_at: "./test/to_be_copied.txt")
-  let assert Ok("Hello") = read("./test/copied.txt")
-  let assert Ok(_) = delete("./test/copied.txt")
+    copy_file(at: "./tmp/to_be_copied.txt", to: "./tmp/copied.txt")
+  let assert Ok(_) = delete(file_or_dir_at: "./tmp/to_be_copied.txt")
+  let assert Ok("Hello") = read("./tmp/copied.txt")
+  let assert Ok(_) = delete("./tmp/copied.txt")
 }
 
 pub fn rename_test() {
-  let assert Ok(_) = write("Hello", to: "./test/to_be_renamed.txt")
+  let assert Ok(_) = write("Hello", to: "./tmp/to_be_renamed.txt")
   let assert Ok(Nil) =
-    rename_file("./test/to_be_renamed.txt", to: "./test/renamed.txt")
-  let assert False = is_file("./test/to_be_renamed.txt")
-  let assert True = is_file("./test/renamed.txt")
-  let assert Ok(_) = delete("./test/renamed.txt")
+    rename_file("./tmp/to_be_renamed.txt", to: "./tmp/renamed.txt")
+  let assert False = is_file("./tmp/to_be_renamed.txt")
+  let assert True = is_file("./tmp/renamed.txt")
+  let assert Ok(_) = delete("./tmp/renamed.txt")
 }
 
 pub fn copy_directory_test() {
   // Make directory for copying
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir")
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir/nested_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir/nested_dir")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/file.txt")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/nested_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/nested_dir/file.txt")
 
   // Copy the directory
   let assert Ok(_) =
-    copy_directory("./test/to_be_copied_dir", to: "./test/copied_dir")
+    copy_directory("./tmp/to_be_copied_dir", to: "./tmp/copied_dir")
 
   // Assert the contents are correct
-  let assert Ok("Hello") = read("./test/copied_dir/file.txt")
-  let assert Ok("Hello") = read("./test/copied_dir/nested_dir/file.txt")
+  let assert Ok("Hello") = read("./tmp/copied_dir/file.txt")
+  let assert Ok("Hello") = read("./tmp/copied_dir/nested_dir/file.txt")
 
   // Cleanup
-  let assert Ok(_) = delete("./test/to_be_copied_dir")
-  let assert Ok(_) = delete("./test/copied_dir")
+  let assert Ok(_) = delete("./tmp/to_be_copied_dir")
+  let assert Ok(_) = delete("./tmp/copied_dir")
 }
 
 pub fn rename_directory_test() {
   // Make directory for copying
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir")
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir/nested_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir/nested_dir")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/file.txt")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/nested_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/nested_dir/file.txt")
 
   // Copy the directory
   let assert Ok(_) =
-    rename_directory("./test/to_be_copied_dir", to: "./test/copied_dir")
+    rename_directory("./tmp/to_be_copied_dir", to: "./tmp/copied_dir")
 
   // Assert the contents are correct
-  let assert Ok("Hello") = read("./test/copied_dir/file.txt")
-  let assert Ok("Hello") = read("./test/copied_dir/nested_dir/file.txt")
+  let assert Ok("Hello") = read("./tmp/copied_dir/file.txt")
+  let assert Ok("Hello") = read("./tmp/copied_dir/nested_dir/file.txt")
 
   // Cleanup
-  let assert Error(_) = read("./test/to_be_copied_dir")
-  let assert Ok(_) = delete("./test/copied_dir")
+  let assert Error(_) = read("./tmp/to_be_copied_dir")
+  let assert Ok(_) = delete("./tmp/copied_dir")
 }
 
 pub fn copy_directory_nested_needs_create_all_test() {
   // Make directory for copying
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir")
-  let assert Ok(_) = create_directory("./test/to_be_copied_dir/nested_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir")
+  let assert Ok(_) = create_directory("./tmp/to_be_copied_dir/nested_dir")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/file.txt")
   let assert Ok(_) =
     "Hello"
-    |> write("./test/to_be_copied_dir/nested_dir/file.txt")
+    |> write("./tmp/to_be_copied_dir/nested_dir/file.txt")
 
   // Copy the directory
   let assert Ok(_) =
-    copy_directory("./test/to_be_copied_dir", to: "./test/nest/nest/copied_dir")
+    copy_directory("./tmp/to_be_copied_dir", to: "./tmp/nest/nest/copied_dir")
 
   // Assert the contents are correct
-  let assert Ok("Hello") = read("./test/nest/nest/copied_dir/file.txt")
+  let assert Ok("Hello") = read("./tmp/nest/nest/copied_dir/file.txt")
   let assert Ok("Hello") =
-    read("./test/nest/nest/copied_dir/nested_dir/file.txt")
+    read("./tmp/nest/nest/copied_dir/nested_dir/file.txt")
 
   // Cleanup
-  let assert Ok(_) = delete("./test/to_be_copied_dir")
-  let assert Ok(_) = delete("./test/nest")
+  let assert Ok(_) = delete("./tmp/to_be_copied_dir")
+  let assert Ok(_) = delete("./tmp/nest")
 }
 
 pub fn delete_test() {
   // Basic delete
-  let assert Ok(_) = write("Hello", to: "./test/existing_file.txt")
-  let assert Ok(_) = delete("./test/existing_file.txt")
+  let assert Ok(_) = write("Hello", to: "./tmp/existing_file.txt")
+  let assert Ok(_) = delete("./tmp/existing_file.txt")
 
   // Deleting a file that doesn't exist throws an error
   let assert Error(Enoent) = delete("./idontexist")
 }
 
 pub fn delete_all_test() {
-  list.each(
-    [1, 2, 3, 4, 5],
-    fn(item) { write("Hello", to: "./test" <> int.to_string(item) <> ".txt") },
-  )
-  let assert Ok(_) =
-    delete_all([
-      "./test1.txt", "./test2.txt", "./test3.txt", "./test4.txt", "./test5.txt",
-      "./idontexist",
-    ])
+  let files =
+    list.map(
+      [1, 2, 3, 4, 5],
+      fn(item) { "./tmp/tmp" <> int.to_string(item) <> ".txt" },
+    )
+  list.each(files, fn(item) { write("Hello", to: item) })
+  let assert Ok(_) = delete_all(["./idontexist", ..files])
 }
