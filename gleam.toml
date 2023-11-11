@@ -1,10 +1,10 @@
 name = "simplifile"
-version = "0.2.0"
+version = "0.2.1"
 description = "Basic file operations that work on all targets"
 
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "bcpeinhardt", repo = "simplifile" }
-gleam = ">= 0.32.2"
+gleam = ">= 0.32.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 [javascript.deno]

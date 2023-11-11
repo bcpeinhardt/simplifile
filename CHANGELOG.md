@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v0.2.1 - 11 November 2023
+- Updated ffi js to use `BitArray`
+
 ## v0.2.0 - 6 November 2023
 - Updated for Gleam v0.32.
 
