@@ -129,7 +129,10 @@ pub fn read(from filepath: String) -> Result(String, FileError) {
 /// let assert Ok(Nil) = write("Hello, World!", to: "./hello_world.txt")
 /// ```
 ///
-pub fn write(to filepath: String, contents contents: String) -> Result(Nil, FileError) {
+pub fn write(
+  to filepath: String,
+  contents contents: String,
+) -> Result(Nil, FileError) {
   do_write(contents, to: filepath)
   |> cast_error
 }
@@ -170,7 +173,10 @@ pub fn delete_all(paths paths: List(String)) -> Result(Nil, FileError) {
 /// let assert Ok(Nil) = append("more text", to: "./needs_more_text.txt")
 /// ```
 ///
-pub fn append(to filepath: String, contents contents: String) -> Result(Nil, FileError) {
+pub fn append(
+  to filepath: String,
+  contents contents: String,
+) -> Result(Nil, FileError) {
   do_append(contents, to: filepath)
   |> cast_error
 }
@@ -192,7 +198,10 @@ pub fn read_bits(from filepath: String) -> Result(BitArray, FileError) {
 /// let assert Ok(Nil) = write_bits(<<"Hello, World!":utf8>>, to: "./hello_world.txt")
 /// ```
 ///
-pub fn write_bits(to filepath: String, bits bits: BitArray) -> Result(Nil, FileError) {
+pub fn write_bits(
+  to filepath: String,
+  bits bits: BitArray,
+) -> Result(Nil, FileError) {
   do_write_bits(bits, filepath)
   |> cast_error
 }

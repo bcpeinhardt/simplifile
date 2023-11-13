@@ -4,7 +4,7 @@ import simplifile.{
   Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
   create_directory, create_directory_all, delete, delete_all, is_directory,
   is_file, list_contents, read, read_bits, rename_directory, rename_file, write,
-  write_bits
+  write_bits,
 }
 import gleam/list
 import gleam/int
@@ -257,9 +257,13 @@ pub fn all_the_ways_to_write_a_string_to_a_file_test() {
   let assert Ok(Nil) = write("Hello", to: "./tmp/alltheways.txt")
   let assert Ok("Hello") = read("./tmp/alltheways.txt")
 
-  let assert Ok(Nil) = "Goodbye" |> write(to: "./tmp/alltheways.txt")
+  let assert Ok(Nil) =
+    "Goodbye"
+    |> write(to: "./tmp/alltheways.txt")
   let assert Ok("Goodbye") = read("./tmp/alltheways.txt")
 
-  let assert Ok(Nil) = "./tmp/alltheways.txt" |> write(contents: "Hello")
+  let assert Ok(Nil) =
+    "./tmp/alltheways.txt"
+    |> write(contents: "Hello")
   let assert Ok("Hello") = read("./tmp/alltheways.txt")
 }
