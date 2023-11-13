@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v0.3.0 - 12 November 2023
+- Switched order of parameters for `write`, `append`, `write_bits`, and `append_bits` functions.
+  They now take the filename first.
+
 ## v0.2.1 - 11 November 2023
 - Updated ffi js to use `BitArray`
 
