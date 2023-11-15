@@ -246,7 +246,7 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
 /// 
 /// ## Example
 /// ```gleam
-/// let assert Ok(files_and_folders) = list_contents(of: "./Folder1")
+/// let assert Ok(files_and_folders) = read_directory(at: "./Folder1")
 /// ```
 /// 
 pub fn read_directory(at path: String) -> Result(List(String), FileError) {
