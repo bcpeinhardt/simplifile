@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Renamed `list_contents` to `read_directory`
 
 ## v0.3.0 - 12 November 2023
 - Switched order of parameters for `write`, `append`, `write_bits`, and `append_bits` functions.

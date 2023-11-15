@@ -3,7 +3,7 @@ import gleeunit/should
 import simplifile.{
   Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
   create_directory, create_directory_all, delete, delete_all, is_directory,
-  is_file, list_contents, read, read_bits, rename_directory, rename_file, write,
+  is_file, read, read_bits, read_directory, rename_directory, rename_file, write,
   write_bits,
 }
 import gleam/list
@@ -67,11 +67,11 @@ pub fn make_directory_test() {
   let assert Ok(_) = create_directory(the_directory)
   let assert Error(_) = create_directory(the_directory)
   let assert Error(_) = create_directory("./test/simplifile_test.gleam")
-  let assert Ok([]) = list_contents(the_directory)
+  let assert Ok([]) = read_directory(the_directory)
   let assert Ok(_) = delete(the_directory)
 }
 
-pub fn list_contents_test() {
+pub fn read_directory_test() {
   // Test setup
   let test_dir = "./tmp/test_dir"
   let assert Ok(_) = create_directory(test_dir)
@@ -85,14 +85,14 @@ pub fn list_contents_test() {
   let assert Ok(_) = create_directory(test_dir <> "/test_inner_dir")
 
   // List the contents
-  let assert Ok(stuff) = list_contents(of: test_dir)
+  let assert Ok(stuff) = read_directory(at: test_dir)
   let assert True = list.contains(stuff, "test.txt")
   let assert True = list.contains(stuff, "test2.txt")
   let assert True = list.contains(stuff, "test_inner_dir")
 
   // Verify errors on invalid uses
-  let assert Error(_) = list_contents(of: "./test/simplifile_test.gleam")
-  let assert Error(_) = list_contents(of: "./tmp/i_dont_exist")
+  let assert Error(_) = read_directory(at: "./test/simplifile_test.gleam")
+  let assert Error(_) = read_directory(at: "./tmp/i_dont_exist")
 
   // Cleanup
   let assert Ok(_) = delete(test_dir)

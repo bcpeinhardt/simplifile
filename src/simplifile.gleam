@@ -249,8 +249,8 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
 /// let assert Ok(files_and_folders) = list_contents(of: "./Folder1")
 /// ```
 /// 
-pub fn list_contents(of directory: String) -> Result(List(String), FileError) {
-  do_list_contents(directory)
+pub fn read_directory(at path: String) -> Result(List(String), FileError) {
+  do_read_directory(path)
   |> cast_error
 }
 
@@ -316,7 +316,7 @@ pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError)
 
 fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
   // Iterate over the segments of the file
-  use segments <- result.try(list_contents(src))
+  use segments <- result.try(read_directory(src))
   segments
   |> list.each(fn(segment) {
     let src_path = src <> "/" <> segment
@@ -411,7 +411,7 @@ fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "listContents")
-fn do_list_contents(directory_path: String) -> Result(List(String), String)
+fn do_read_directory(directory_path: String) -> Result(List(String), String)
 
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "copyFile")
@@ -545,7 +545,7 @@ fn do_make_directory(directory: String) -> Result(Nil, FileError)
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "list_directory")
-fn do_list_contents(directory: String) -> Result(List(String), FileError)
+fn do_read_directory(directory: String) -> Result(List(String), FileError)
 
 @external(erlang, "simplifile_erl", "is_file")
 @external(javascript, "./simplifile_js.mjs", "isFile")
