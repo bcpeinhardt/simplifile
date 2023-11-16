@@ -354,6 +354,22 @@ pub fn rename_directory(
   delete(src)
 }
 
+/// Returns a list of filepaths for every file in the directory, including nested
+/// files.
+/// 
+pub fn get_files(in directory: String) -> Result(List(String), FileError) {
+  use contents <- result.try(read_directory(directory))
+  let paths = list.map(contents, fn(segment) { directory <> "/" <> segment })
+  let files = list.filter(paths, is_file)
+  case list.filter(paths, is_directory) {
+    [] -> Ok(files)
+    directories -> {
+      use nested_files <- result.try(list.try_map(directories, get_files))
+      Ok(list.append(files, list.flatten(nested_files)))
+    }
+  }
+}
+
 @target(javascript)
 fn do_read(from filepath: String) -> Result(String, String) {
   case do_read_bits(filepath) {

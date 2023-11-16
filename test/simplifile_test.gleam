@@ -2,16 +2,17 @@ import gleeunit
 import gleeunit/should
 import simplifile.{
   Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
-  create_directory, create_directory_all, delete, delete_all, is_directory,
-  is_file, read, read_bits, read_directory, rename_directory, rename_file, write,
-  write_bits,
+  create_directory, create_directory_all, create_file, delete, delete_all,
+  get_files, is_directory, is_file, read, read_bits, read_directory,
+  rename_directory, rename_file, write, write_bits,
 }
 import gleam/list
 import gleam/int
+import gleam/set
 
 pub fn main() {
-  let assert Ok(_) = delete_all(["tmp"])
-  let assert Ok(_) = create_directory("tmp")
+  let assert Ok(_) = delete_all(["./tmp"])
+  let assert Ok(_) = create_directory("./tmp")
   gleeunit.main()
 }
 
@@ -232,6 +233,7 @@ pub fn delete_test() {
   // Basic delete
   let assert Ok(_) = write("Hello", to: "./tmp/existing_file.txt")
   let assert Ok(_) = delete("./tmp/existing_file.txt")
+  let assert Error(Enoent) = read("./tmp/existing_file.txt")
 
   // Deleting a file that doesn't exist throws an error
   let assert Error(Enoent) = delete("./idontexist")
@@ -266,4 +268,26 @@ pub fn all_the_ways_to_write_a_string_to_a_file_test() {
     "./tmp/alltheways.txt"
     |> write(contents: "Hello")
   let assert Ok("Hello") = read("./tmp/alltheways.txt")
+}
+
+pub fn files_test() {
+  let assert Ok(Nil) = create_directory_all("./tmp/1/2/3/4/5")
+  let assert Ok(Nil) =
+    create_directory_all("./tmp/1/empty_dir/nested_empty_dir")
+  let assert Ok(Nil) = create_file("./tmp/1/test.txt")
+  let assert Ok(Nil) = create_file("./tmp/1/2/test.txt")
+  let assert Ok(Nil) = create_file("./tmp/1/2/3/test2.txt")
+  let assert Ok(Nil) = create_file("./tmp/1/2/3/test.txt")
+  let assert Ok(Nil) = create_file("./tmp/1/2/3/4/test.txt")
+  let assert Ok(Nil) = create_file("./tmp/1/2/3/4/5/test.txt")
+
+  let assert Ok(files) = get_files(in: "./tmp/1")
+  list.length(files)
+  |> should.equal(6)
+  files
+  |> set.from_list
+  |> should.equal(set.from_list([
+    "./tmp/1/test.txt", "./tmp/1/2/test.txt", "./tmp/1/2/3/test2.txt",
+    "./tmp/1/2/3/test.txt", "./tmp/1/2/3/4/test.txt", "./tmp/1/2/3/4/5/test.txt",
+  ]))
 }
