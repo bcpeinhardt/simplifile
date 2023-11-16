@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v0.4.0 - 15 November 2023
 - Renamed `list_contents` to `read_directory`
 - Added `get_files`
 

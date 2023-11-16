@@ -6,6 +6,9 @@
 Simplifile provides basic file operations (read, write, append, and delete) that work
 for all targets (Erlang, Node, and Deno). It also provides functions for working with directories.
 
+Note: this library is evolving rapidly to get it ready for v1 status. When upgrading versions,
+be sure to check the changelog. 
+
 ## Example
 ```gleam
 let filepath = "./test/hello.txt"
@@ -14,14 +17,6 @@ let assert Ok(_) = "Goodbye, Mars" |> append(to: filepath)
 let assert Ok("Hello, WorldGoodbye, Mars") = read(from: filepath)
 let assert Ok(_) = delete(filepath)
 let assert Error(_) = read(from: filepath)
-```
-
-## Quick start
-
-```sh
-gleam run   # Run the project
-gleam test  # Run the tests
-gleam shell # Run an Erlang shell
 ```
 
 ## Installation
