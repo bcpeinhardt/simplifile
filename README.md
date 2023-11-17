@@ -6,8 +6,7 @@
 Simplifile provides basic file operations (read, write, append, and delete) that work
 for all targets (Erlang, Node, and Deno). It also provides functions for working with directories.
 
-Note: this library is evolving rapidly to get it ready for v1 status. When upgrading versions,
-be sure to check the changelog. 
+Note: When upgrading versions, be sure to check the changelog. 
 
 ## Example
 ```gleam

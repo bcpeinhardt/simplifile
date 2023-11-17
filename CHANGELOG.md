@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.0.0 - 16 November 2023
+- No changes, just going v1 so somver starts working
+
 ## v0.4.0 - 15 November 2023
 - Renamed `list_contents` to `read_directory`
 - Added `get_files`
