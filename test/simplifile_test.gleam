@@ -1,14 +1,17 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, NotUtf8, append, append_bits, copy_directory, copy_file,
-  create_directory, create_directory_all, create_file, delete, delete_all,
-  get_files, is_directory, is_file, read, read_bits, read_directory,
-  rename_directory, rename_file, write, write_bits,
+  Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append, append_bits,
+  copy_directory, copy_file, create_directory, create_directory_all, create_file,
+  delete, delete_all, file_permissions_to_octal, get_files, is_directory,
+  is_file, read, read_bits, read_directory, rename_directory, rename_file,
+  set_permissions, set_permissions_octal, write, write_bits,
 }
 import gleam/list
 import gleam/int
 import gleam/set
+
+// import gleam/io
 
 pub fn main() {
   let assert Ok(_) = delete_all(["./tmp"])
@@ -241,10 +244,9 @@ pub fn delete_test() {
 
 pub fn delete_all_test() {
   let files =
-    list.map(
-      [1, 2, 3, 4, 5],
-      fn(item) { "./tmp/tmp" <> int.to_string(item) <> ".txt" },
-    )
+    list.map([1, 2, 3, 4, 5], fn(item) {
+      "./tmp/tmp" <> int.to_string(item) <> ".txt"
+    })
   list.each(files, fn(item) { write("Hello", to: item) })
   let assert Ok(_) = delete_all(["./idontexist", ..files])
 }
@@ -286,8 +288,51 @@ pub fn files_test() {
   |> should.equal(6)
   files
   |> set.from_list
-  |> should.equal(set.from_list([
-    "./tmp/1/test.txt", "./tmp/1/2/test.txt", "./tmp/1/2/3/test2.txt",
-    "./tmp/1/2/3/test.txt", "./tmp/1/2/3/4/test.txt", "./tmp/1/2/3/4/5/test.txt",
-  ]))
+  |> should.equal(
+    set.from_list([
+      "./tmp/1/test.txt", "./tmp/1/2/test.txt", "./tmp/1/2/3/test2.txt",
+      "./tmp/1/2/3/test.txt", "./tmp/1/2/3/4/test.txt",
+      "./tmp/1/2/3/4/5/test.txt",
+    ]),
+  )
+}
+
+pub fn octal_math_test() {
+  let all = set.from_list([Read, Write, Execute])
+  let all = FilePermissions(user: all, group: all, other: all)
+  all
+  |> file_permissions_to_octal
+  |> should.equal(0o00777)
+}
+
+pub fn permissions_test() {
+  let assert Ok(Nil) = create_directory("./tmp/permissions")
+  let assert Ok(Nil) =
+    write("echo \"Hello from a file\"", to: "./tmp/permissions/test.sh")
+
+  // This is the equivalent of `chmod 777 ./tmp/permissions/test.sh`
+  let all = set.from_list([Read, Write, Execute])
+  let all = FilePermissions(user: all, group: all, other: all)
+  let assert Ok(Nil) = set_permissions("./tmp/permissions/test.sh", all)
+  let assert Ok(Nil) = delete("./tmp/permissions/test.sh")
+
+  let assert Ok(Nil) =
+    write("echo \"Hello from a file\"", to: "./tmp/permissions/test2.sh")
+  let assert Ok(Nil) =
+    set_permissions_octal("./tmp/permissions/test2.sh", 0o777)
+
+  let assert Ok(Nil) = delete("./tmp/permissions/test2.sh")
+  let assert Ok(Nil) = delete("./tmp/permissions")
+}
+
+pub fn permissions_octal_test() {
+  let assert Ok(Nil) = create_directory("./tmp/permissions")
+  let assert Ok(Nil) =
+    write("echo \"Hello from a file\"", to: "./tmp/permissions/test2.sh")
+
+  let assert Ok(Nil) =
+    set_permissions_octal("./tmp/permissions/test2.sh", 0o777)
+  // io.debug(res)
+  let assert Ok(Nil) = delete("./tmp/permissions/test2.sh")
+  let assert Ok(Nil) = delete("./tmp/permissions")
 }

@@ -2,7 +2,7 @@
 -export([
     read_file/1,
     append_file/2, write_file/2, delete_file/1, delete_directory/1, recursive_delete/1,
-    list_directory/1, make_directory/1, is_file/1, create_dir_all/1, rename_file/2
+    list_directory/1, make_directory/1, is_file/1, create_dir_all/1, rename_file/2, set_permissions/2
 ]).
 
 -define(is_posix_error(Error),
@@ -68,3 +68,6 @@ create_dir_all(Filename) ->
 
 rename_file(Source, Destination) ->
     posix_result(file:rename(Source, Destination)).
+
+set_permissions(Filename, Permissions) ->
+    posix_result(file:change_mode(Filename, Permissions)).

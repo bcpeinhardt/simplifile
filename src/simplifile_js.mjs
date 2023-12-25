@@ -100,3 +100,12 @@ export function renameFile(srcpath, destpath) {
         return new GError(stringifyError(e))
     }
 }
+
+export function setPermissions(filepath, octalNumber) {
+    try {
+        fs.chmodSync(path.normalize(filepath), octalNumber)
+        return new Ok(undefined)
+    } catch (e) {
+        return new GError(stringifyError(e))
+    }
+}

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v1.1.0 - 25 December 2023
+- Added `set_permissions` and `set_permissions_octal` functions for setting
+  permissions on a file
+
 ## v1.0.0 - 16 November 2023
 - No changes, just going v1 so somver starts working
 

@@ -2,6 +2,8 @@ import gleam/bit_array
 import gleam/string
 import gleam/result
 import gleam/list
+import gleam/set.{type Set}
+import gleam/int
 
 /// This type represents all of the reasons for why a file system operation could fail.
 ///
@@ -370,6 +372,86 @@ pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   }
 }
 
+/// Represents a file permission
+pub type Permission {
+  Read
+  Write
+  Execute
+}
+
+fn permission_to_integer(permission: Permission) -> Int {
+  case permission {
+    Read -> 0o4
+    Write -> 0o2
+    Execute -> 0o1
+  }
+}
+
+/// Represents a set of file permissions for a given file
+pub type FilePermissions {
+  FilePermissions(
+    user: Set(Permission),
+    group: Set(Permission),
+    other: Set(Permission),
+  )
+}
+
+pub fn file_permissions_to_octal(permissions: FilePermissions) -> Int {
+  let make_permission_digit = fn(permissions: Set(Permission)) {
+    permissions
+    |> set.to_list
+    |> list.map(permission_to_integer)
+    |> int.sum
+  }
+
+  make_permission_digit(permissions.user) * 64 + make_permission_digit(
+    permissions.group,
+  ) * 8 + make_permission_digit(permissions.other)
+}
+
+/// Sets the permissions for a given file
+/// 
+/// # Example
+/// ```gleam
+/// let all = set.from_list([Read, Write, Execute])
+/// let all = FilePermissions(user: all, group: all, other: all)
+/// let assert Ok(Nil) = set_permissions("./script.sh", all)
+/// ```
+pub fn set_permissions(
+  for_file_at filepath: String,
+  to permissions: FilePermissions,
+) -> Result(Nil, FileError) {
+  set_permissions_octal(filepath, file_permissions_to_octal(permissions))
+}
+
+/// Sets the permissions for a given file using an octal representation
+/// 
+/// # Example
+/// ```gleam
+/// set_permissions_octal("./script.sh", 0o777)
+/// ```
+pub fn set_permissions_octal(
+  for_file_at filepath: String,
+  to permissions: Int,
+) -> Result(Nil, FileError) {
+  do_set_permissions(filepath, permissions)
+  |> cast_error
+}
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "setPermissions")
+fn do_set_permissions(
+  file_at: String,
+  permissions_octal: Int,
+) -> Result(Nil, String)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "set_permissions")
+fn do_set_permissions(
+  file_at: String,
+  permissions_octal: Int,
+) -> Result(Nil, FileError)
+
 @target(javascript)
 fn do_read(from filepath: String) -> Result(String, String) {
   case do_read_bits(filepath) {
@@ -439,62 +521,59 @@ fn do_rename_file(at: String, to: String) -> Result(Nil, String)
 
 @target(javascript)
 fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
-  result.map_error(
-    input,
-    fn(e) {
-      case e {
-        "EACCES" -> Eacces
-        "EAGAIN" -> Eagain
-        "EBADF" -> Ebadf
-        "EBADMSG" -> Ebadmsg
-        "EBUSY" -> Ebusy
-        "EDEADLK" -> Edeadlk
-        "EDEADLOCK" -> Edeadlock
-        "EDQUOT" -> Edquot
-        "EEXIST" -> Eexist
-        "EFAULT" -> Efault
-        "EFBIG" -> Efbig
-        "EFTYPE" -> Eftype
-        "EINTR" -> Eintr
-        "EINVAL" -> Einval
-        "EIO" -> Eio
-        "EISDIR" -> Eisdir
-        "ELOOP" -> Eloop
-        "EMFILE" -> Emfile
-        "EMLINK" -> Emlink
-        "EMULTIHOP" -> Emultihop
-        "ENAMETOOLONG" -> Enametoolong
-        "ENFILE" -> Enfile
-        "ENOBUFS" -> Enobufs
-        "ENODEV" -> Enodev
-        "ENOLCK" -> Enolck
-        "ENOLINK" -> Enolink
-        "ENOENT" -> Enoent
-        "ENOMEM" -> Enomem
-        "ENOSPC" -> Enospc
-        "ENOSR" -> Enosr
-        "ENOSTR" -> Enostr
-        "ENOSYS" -> Enosys
-        "ENOBLK" -> Enotblk
-        "ENODIR" -> Enotdir
-        "ENOTSUP" -> Enotsup
-        "ENXIO" -> Enxio
-        "EOPNOTSUPP" -> Eopnotsupp
-        "EOVERFLOW" -> Eoverflow
-        "EPERM" -> Eperm
-        "EPIPE" -> Epipe
-        "ERANGE" -> Erange
-        "EROFS" -> Erofs
-        "ESPIPE" -> Espipe
-        "ESRCH" -> Esrch
-        "ESTALE" -> Estale
-        "ETXTBSY" -> Etxtbsy
-        "EXDEV" -> Exdev
-        "NOTUTF8" -> NotUtf8
-        _ -> Unknown
-      }
-    },
-  )
+  result.map_error(input, fn(e) {
+    case e {
+      "EACCES" -> Eacces
+      "EAGAIN" -> Eagain
+      "EBADF" -> Ebadf
+      "EBADMSG" -> Ebadmsg
+      "EBUSY" -> Ebusy
+      "EDEADLK" -> Edeadlk
+      "EDEADLOCK" -> Edeadlock
+      "EDQUOT" -> Edquot
+      "EEXIST" -> Eexist
+      "EFAULT" -> Efault
+      "EFBIG" -> Efbig
+      "EFTYPE" -> Eftype
+      "EINTR" -> Eintr
+      "EINVAL" -> Einval
+      "EIO" -> Eio
+      "EISDIR" -> Eisdir
+      "ELOOP" -> Eloop
+      "EMFILE" -> Emfile
+      "EMLINK" -> Emlink
+      "EMULTIHOP" -> Emultihop
+      "ENAMETOOLONG" -> Enametoolong
+      "ENFILE" -> Enfile
+      "ENOBUFS" -> Enobufs
+      "ENODEV" -> Enodev
+      "ENOLCK" -> Enolck
+      "ENOLINK" -> Enolink
+      "ENOENT" -> Enoent
+      "ENOMEM" -> Enomem
+      "ENOSPC" -> Enospc
+      "ENOSR" -> Enosr
+      "ENOSTR" -> Enostr
+      "ENOSYS" -> Enosys
+      "ENOBLK" -> Enotblk
+      "ENODIR" -> Enotdir
+      "ENOTSUP" -> Enotsup
+      "ENXIO" -> Enxio
+      "EOPNOTSUPP" -> Eopnotsupp
+      "EOVERFLOW" -> Eoverflow
+      "EPERM" -> Eperm
+      "EPIPE" -> Epipe
+      "ERANGE" -> Erange
+      "EROFS" -> Erofs
+      "ESPIPE" -> Espipe
+      "ESRCH" -> Esrch
+      "ESTALE" -> Estale
+      "ETXTBSY" -> Etxtbsy
+      "EXDEV" -> Exdev
+      "NOTUTF8" -> NotUtf8
+      _ -> Unknown
+    }
+  })
 }
 
 @target(erlang)
