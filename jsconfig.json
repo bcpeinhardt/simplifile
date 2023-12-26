@@ -1,0 +1,6 @@
+{
+    "compilerOptions": {
+      "checkJs": true,
+      "rootDirs": ["src", "build/dev/javascript/simplifile"],
+    }
+  }
