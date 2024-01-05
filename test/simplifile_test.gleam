@@ -336,3 +336,9 @@ pub fn permissions_octal_test() {
   let assert Ok(Nil) = delete("./tmp/permissions/test2.sh")
   let assert Ok(Nil) = delete("./tmp/permissions")
 }
+
+pub fn get_files_with_slash_test() {
+  let assert Ok(files) = get_files(in: "./test/")
+  files
+  |> should.equal(["./test/simplifile_test.gleam"])
+}

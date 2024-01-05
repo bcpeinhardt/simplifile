@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.1.1 - 5 January 2024
+- Fix bug with double "/" from `get_files`
+
 ## v1.1.0 - 25 December 2023
 - Added `set_permissions` and `set_permissions_octal` functions for setting
   permissions on a file

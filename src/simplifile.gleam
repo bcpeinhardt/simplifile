@@ -361,7 +361,16 @@ pub fn rename_directory(
 /// 
 pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use contents <- result.try(read_directory(directory))
-  let paths = list.map(contents, fn(segment) { directory <> "/" <> segment })
+  let paths =
+    list.map(contents, fn(segment) {
+      case
+        directory
+        |> string.ends_with("/")
+      {
+        True -> directory <> segment
+        False -> directory <> "/" <> segment
+      }
+    })
   let files = list.filter(paths, is_file)
   case list.filter(paths, is_directory) {
     [] -> Ok(files)
