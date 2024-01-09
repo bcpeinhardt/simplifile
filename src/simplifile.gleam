@@ -268,7 +268,8 @@ pub fn is_file(filepath: String) -> Bool {
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
   case
     filepath
-    |> is_file || filepath
+    |> is_file
+    || filepath
     |> is_directory
   {
     True -> Error(Eexist)
@@ -413,9 +414,9 @@ pub fn file_permissions_to_octal(permissions: FilePermissions) -> Int {
     |> int.sum
   }
 
-  make_permission_digit(permissions.user) * 64 + make_permission_digit(
-    permissions.group,
-  ) * 8 + make_permission_digit(permissions.other)
+  make_permission_digit(permissions.user) * 64
+  + make_permission_digit(permissions.group) * 8
+  + make_permission_digit(permissions.other)
 }
 
 /// Sets the permissions for a given file

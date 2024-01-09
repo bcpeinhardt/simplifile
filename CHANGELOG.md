@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.1.2 - 9 January 2024
+- Update stdlib dep to 0.33
+
 ## v1.1.1 - 5 January 2024
 - Fix bug with double "/" from `get_files`
 
