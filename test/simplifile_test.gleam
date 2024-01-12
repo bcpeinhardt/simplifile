@@ -3,9 +3,9 @@ import gleeunit/should
 import simplifile.{
   Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append, append_bits,
   copy_directory, copy_file, create_directory, create_directory_all, create_file,
-  delete, delete_all, file_permissions_to_octal, get_files, is_directory,
-  is_file, read, read_bits, read_directory, rename_directory, rename_file,
-  set_permissions, set_permissions_octal, write, write_bits,
+  current_directory, delete, delete_all, file_permissions_to_octal, get_files,
+  is_directory, is_file, read, read_bits, read_directory, rename_directory,
+  rename_file, set_permissions, set_permissions_octal, write, write_bits,
 }
 import gleam/list
 import gleam/int
@@ -341,4 +341,9 @@ pub fn get_files_with_slash_test() {
   let assert Ok(files) = get_files(in: "./test/")
   files
   |> should.equal(["./test/simplifile_test.gleam"])
+}
+
+pub fn current_directory_test() {
+  Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile")
+  |> should.equal(current_directory())
 }

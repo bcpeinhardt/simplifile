@@ -448,6 +448,27 @@ pub fn set_permissions_octal(
   |> cast_error
 }
 
+/// Returns the current working directory
+/// 
+pub fn current_directory() -> Result(String, FileError) {
+  do_current_directory()
+  |> cast_error
+}
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "currentDirectory")
+fn do_current_directory() -> Result(String, String)
+
+@target(erlang)
+fn do_current_directory() -> Result(String, FileError) {
+  do_do_current_directory()
+  |> result.map(string.from_utf_codepoints)
+}
+
+@target(erlang)
+@external(erlang, "file", "get_cwd")
+fn do_do_current_directory() -> Result(List(UtfCodepoint), FileError)
+
 @target(javascript)
 @external(javascript, "./simplifile_js.mjs", "setPermissions")
 fn do_set_permissions(

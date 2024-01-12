@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.2.0 - 11 January 2024
+- Add the `current_directory` function
+
 ## v1.1.2 - 9 January 2024
 - Update stdlib dep to 0.33
 

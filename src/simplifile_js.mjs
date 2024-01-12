@@ -2,6 +2,7 @@
 
 import fs from "node:fs"
 import path from "node:path"
+import process from "node:process"
 import { BitArray, Ok, Error as GError, toList} from "./gleam.mjs";
 
 /**
@@ -140,6 +141,15 @@ export function renameFile(srcpath, destpath) {
  */
 export function setPermissions(filepath, octalNumber) {
     return gleamResult(() => fs.chmodSync(path.normalize(filepath), octalNumber))
+}
+
+/**
+ * Return the current directory.
+ * 
+ * @returns {Ok | GError} The current directory
+ */
+export function currentDirectory() {
+    return gleamResult(() => process.cwd())
 }
 
 /**
