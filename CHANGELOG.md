@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v1.3.0 - 26 January 2024
+- Deprecate `is_file` and `is_directory` in favor of `verify_is_file` and `verify_is_directory`,
+  which error on lack of permissions rather than silently returning false.
+
 ## v1.2.0 - 11 January 2024
 - Add the `current_directory` function
 
