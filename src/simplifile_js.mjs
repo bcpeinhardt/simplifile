@@ -43,23 +43,61 @@ export function appendBits(contents, filepath) {
 /**
  * Check whether a file exists at the given path
  * 
+ * @deprecated Use `isValidFile` instead
  * @param {string} filepath 
  * @returns {boolean} 
  */
 export function isFile(filepath) {
     let fp = path.normalize(filepath)
-    return fs.existsSync(fp) && fs.lstatSync(fp).isFile();
+    return fs.existsSync(fp) && fs.statSync(fp).isFile();
+}
+
+/**
+ * Check whether a file exists at the given path
+ * 
+ * @param {string} filepath 
+ * @returns {Ok | GError} 
+ */
+export function isValidFile(filepath) {
+    try {
+        return new Ok(fs.statSync(path.normalize(filepath)).isFile());
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            return new Ok(false);
+        } else {
+            return new GError(e.code);
+        }
+    }
+}
+
+/**
+ * Check whether a directory exists at the given path
+ * 
+ * @deprecated Use `isValidDirectory` instead
+ * @param {string} filepath 
+ * @returns {boolean}
+ */
+export function isDirectory(filepath) {
+    let fp = path.normalize(filepath)
+    return fs.existsSync(fp) && fs.statSync(fp).isDirectory();
 }
 
 /**
  * Check whether a directory exists at the given path
  * 
  * @param {string} filepath 
- * @returns {boolean}
+ * @returns {Ok | GError} 
  */
-export function isDirectory(filepath) {
-    let fp = path.normalize(filepath)
-    return fs.existsSync(fp) && fs.lstatSync(fp).isDirectory();
+export function isValidDirectory(filepath) {
+    try {
+        return new Ok(fs.statSync(path.normalize(filepath)).isDirectory());
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            return new Ok(false);
+        } else {
+            return new GError(e.code);
+        }
+    }
 }
 
 /**

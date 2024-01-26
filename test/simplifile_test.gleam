@@ -1,11 +1,12 @@
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append, append_bits,
-  copy_directory, copy_file, create_directory, create_directory_all, create_file,
-  current_directory, delete, delete_all, file_permissions_to_octal, get_files,
-  is_directory, is_file, read, read_bits, read_directory, rename_directory,
-  rename_file, set_permissions, set_permissions_octal, write, write_bits,
+  Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
+  append_bits, copy_directory, copy_file, create_directory, create_directory_all,
+  create_file, current_directory, delete, delete_all, file_permissions_to_octal,
+  get_files, read, read_bits, read_directory, rename_directory, rename_file,
+  set_permissions, set_permissions_octal, verify_is_directory, verify_is_file,
+  write, write_bits,
 }
 import gleam/list
 import gleam/int
@@ -61,7 +62,7 @@ pub fn path_test() {
     "Hello"
     |> write(to: filepath)
 
-  let assert False = is_directory(filepath)
+  let assert Ok(False) = verify_is_directory(filepath)
 
   let assert Ok(_) = delete(file_or_dir_at: "./tmp/path_test.txt")
 }
@@ -79,7 +80,7 @@ pub fn read_directory_test() {
   // Test setup
   let test_dir = "./tmp/test_dir"
   let assert Ok(_) = create_directory(test_dir)
-  let assert True = is_directory(test_dir)
+  let assert Ok(True) = verify_is_directory(test_dir)
   let assert Ok(_) =
     "some txt"
     |> write(to: test_dir <> "/test.txt")
@@ -114,30 +115,30 @@ pub fn non_utf_test() {
 pub fn is_file_test() {
   // Basic usage
   let filepath = "./tmp/is_file_test.txt"
-  let assert False = is_file(filepath)
+  let assert Ok(False) = verify_is_file(filepath)
   let assert Ok(_) =
     ""
     |> write(to: filepath)
-  let assert True = is_file(filepath)
+  let assert Ok(True) = verify_is_file(filepath)
   let assert Ok(_) = delete(file_or_dir_at: filepath)
-  let assert False = is_file(filepath)
+  let assert Ok(False) = verify_is_file(filepath)
 
   // A directory is not a file
-  let assert False = is_file("./tmp")
+  let assert Ok(False) = verify_is_file("./tmp")
 }
 
 pub fn is_directory_test() {
-  let assert True = is_directory("./tmp")
-  let assert False = is_directory("./does_not_exist")
+  let assert Ok(True) = verify_is_directory("./tmp")
+  let assert Ok(False) = verify_is_directory("./does_not_exist")
 
   // A file is not a directory
-  let assert False = is_directory("./simplifile.gleam")
+  let assert Ok(False) = verify_is_directory("./simplifile.gleam")
 }
 
 pub fn create_all_test() {
   let assert Ok(_) = create_directory_all("./tmp/level1/level2")
-  let assert True = is_directory("./tmp/level1")
-  let assert True = is_directory("./tmp/level1/level2")
+  let assert Ok(True) = verify_is_directory("./tmp/level1")
+  let assert Ok(True) = verify_is_directory("./tmp/level1/level2")
   let assert Ok(_) = delete("./tmp/level1")
 }
 
@@ -154,8 +155,8 @@ pub fn rename_test() {
   let assert Ok(_) = write("Hello", to: "./tmp/to_be_renamed.txt")
   let assert Ok(Nil) =
     rename_file("./tmp/to_be_renamed.txt", to: "./tmp/renamed.txt")
-  let assert False = is_file("./tmp/to_be_renamed.txt")
-  let assert True = is_file("./tmp/renamed.txt")
+  let assert Ok(False) = verify_is_file("./tmp/to_be_renamed.txt")
+  let assert Ok(True) = verify_is_file("./tmp/renamed.txt")
   let assert Ok(_) = delete("./tmp/renamed.txt")
 }
 
@@ -347,3 +348,57 @@ pub fn current_directory_test() {
   Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile")
   |> should.equal(current_directory())
 }
+
+pub fn verify_is_file_and_is_dir_test() {
+  let existing_file = "./gleam.toml"
+  let existing_dir = "./test"
+  let non_existing_file = "./i_dont_exist"
+
+  let assert Ok(True) = verify_is_file(existing_file)
+  let assert Ok(True) = verify_is_directory(existing_dir)
+
+  let assert Ok(False) = verify_is_directory(existing_file)
+  let assert Ok(False) = verify_is_file(existing_dir)
+
+  let assert Ok(False) = verify_is_file(non_existing_file)
+  let assert Ok(False) = verify_is_directory(non_existing_file)
+}
+
+pub fn no_read_permissions_test() {
+  // Create a directory with a test file and a test directory inside, then
+  // remove all its permissions
+  let parent_dir = "./tmp/no_read_permissions_dir"
+  let new_file = "./tmp/no_read_permissions_dir/no_read_permissions.txt"
+  let new_dir = "./tmp/no_read_permissions_dir/no_read_permissions"
+  let assert Ok(Nil) = create_directory(parent_dir)
+  let assert Ok(Nil) = create_directory(new_dir)
+  let assert Ok(Nil) = write("Hello", to: new_file)
+  let assert Ok(Nil) = set_permissions_octal(parent_dir, 0o000)
+
+  // Verify that we can't read the file or directory
+  let assert Error(Eacces) = verify_is_file(new_file)
+  let assert Error(Eacces) = verify_is_directory(new_dir)
+
+  // Cleanup
+  let assert Ok(Nil) = set_permissions_octal(parent_dir, 0o777)
+  let assert Ok(Nil) = delete(parent_dir)
+}
+// pub fn is_file_and_is_dir_test() {
+//   let existing_file = "./gleam.toml"
+//   let existing_dir = "./test"
+//   let non_existing_file = "./i_dont_exist"
+//   let file_permission_issue = "/etc"
+
+//   let assert True = is_file(existing_file)
+//   let assert True = is_directory(existing_dir)
+
+//   let assert False = is_directory(existing_file)
+//   let assert False = is_file(existing_dir)
+
+//   let assert False = is_file(non_existing_file)
+//   let assert False = is_directory(non_existing_file)
+
+//   // let assert False = is_file(file_permission_issue)
+//   // This fails on javascript, because the permission error throws
+//   // let assert False = is_directory(file_permission_issue)
+// }

@@ -227,9 +227,31 @@ pub fn append_bits(
 /// ```gleam
 /// let assert True = is_directory("./test")
 /// ```
+/// 
+@deprecated("Use `is_valid_directory` instead")
 pub fn is_directory(filepath: String) -> Bool {
   do_is_directory(filepath)
 }
+
+/// Checks if the provided filepath exists and is a directory.
+/// Returns an error if it lacks permissions to read the directory.
+/// 
+/// ## Example
+/// ```gleam
+/// let assert Ok(True) = verify_is_directory("./test")
+/// ```
+pub fn verify_is_directory(filepath: String) -> Result(Bool, FileError) {
+  do_verify_is_directory(filepath)
+  |> cast_error
+}
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "isValidDirectory")
+fn do_verify_is_directory(filepath: String) -> Result(Bool, String)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "is_valid_directory")
+fn do_verify_is_directory(filepath: String) -> Result(Bool, FileError)
 
 /// Create a directory at the provided filepath. Returns an error if
 /// the directory already exists.
@@ -258,9 +280,31 @@ pub fn read_directory(at path: String) -> Result(List(String), FileError) {
 
 /// Returns `True` if there is a file at the given path, false otherwise.
 /// 
+@deprecated("Use `is_valid_file` instead")
 pub fn is_file(filepath: String) -> Bool {
   do_is_file(filepath)
 }
+
+/// Checks if the file at the provided filepath exists and is a file.
+/// Returns an Error if it lacks permissions to read the file.
+/// 
+/// ## Example
+/// ```gleam
+/// let assert Ok(True) = verify_is_file("./test.txt")
+/// ```
+///
+pub fn verify_is_file(filepath: String) -> Result(Bool, FileError) {
+  do_verify_is_file(filepath)
+  |> cast_error
+}
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "isValidFile")
+fn do_verify_is_file(filepath: String) -> Result(Bool, String)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "is_valid_file")
+fn do_verify_is_file(filepath: String) -> Result(Bool, FileError)
 
 /// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
 /// if the file already exists.
@@ -268,12 +312,12 @@ pub fn is_file(filepath: String) -> Bool {
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
   case
     filepath
-    |> is_file
-    || filepath
-    |> is_directory
+    |> verify_is_file,
+    filepath
+    |> verify_is_directory
   {
-    True -> Error(Eexist)
-    False -> write_bits(<<>>, to: filepath)
+    Ok(True), _ | _, Ok(True) -> Error(Eexist)
+    _, _ -> write_bits(<<>>, to: filepath)
   }
 }
 
@@ -325,23 +369,24 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
     let src_path = src <> "/" <> segment
     let dest_path = dest <> "/" <> segment
 
-    case is_file(src_path), is_directory(src_path) {
-      True, False -> {
+    case verify_is_file(src_path), verify_is_directory(src_path) {
+      Ok(True), Ok(False) -> {
         // For a file, create the file in the new directory
         use content <- result.try(read_bits(src_path))
         content
         |> write_bits(to: dest_path)
       }
-      False, True -> {
-        // Create the target directory and recurs
+      Ok(False), Ok(True) -> {
+        // Create the target directory and recurse
         use _ <- result.try(create_directory(dest_path))
         do_copy_directory(src_path, dest_path)
       }
-      _, _ -> {
-        // This should be unreachable. The src_path can't be both a file
-        // and a directory, and it's definitely one of the two because it's
-        // coming from list_contents
-        panic as "unreachable"
+      Error(e), _ | _, Error(e) -> {
+        Error(e)
+      }
+      Ok(False), Ok(False) | Ok(True), Ok(True) -> {
+        // We're really not sure how that one happened.
+        Error(Unknown)
       }
     }
   })
@@ -372,8 +417,8 @@ pub fn get_files(in directory: String) -> Result(List(String), FileError) {
         False -> directory <> "/" <> segment
       }
     })
-  let files = list.filter(paths, is_file)
-  case list.filter(paths, is_directory) {
+  let files = list.filter(paths, fn(path) { verify_is_file(path) == Ok(True) })
+  case list.filter(paths, fn(path) { verify_is_directory(path) == Ok(True) }) {
     [] -> Ok(files)
     directories -> {
       use nested_files <- result.try(list.try_map(directories, get_files))
@@ -414,8 +459,10 @@ pub fn file_permissions_to_octal(permissions: FilePermissions) -> Int {
     |> int.sum
   }
 
-  make_permission_digit(permissions.user) * 64
-  + make_permission_digit(permissions.group) * 8
+  make_permission_digit(permissions.user)
+  * 64
+  + make_permission_digit(permissions.group)
+  * 8
   + make_permission_digit(permissions.other)
 }
 

@@ -7,48 +7,70 @@
 -module(simplifile_erl).
 
 %% API
--export([
-    read_file/1,
-    append_file/2,
-    write_file/2,
-    delete_file/1,
-    delete_directory/1,
-    recursive_delete/1,
-    list_directory/1,
-    make_directory/1,
-    is_file/1,
-    create_dir_all/1,
-    rename_file/2,
-    set_permissions/2
-]).
+- export ( [ read_file / 1 , append_file / 2 , write_file / 2 , delete_file / 1 , delete_directory / 1 , recursive_delete / 1 , list_directory / 1 , make_directory / 1 , is_file / 1 , create_dir_all / 1 , rename_file / 2 , set_permissions / 2 , is_valid_directory / 1 , is_valid_file/1 ] ) .
+
+-include_lib("kernel/include/file.hrl").
 
 %% A macro for checking whether the error returned is one of the atoms for a posixe error.
 -define(is_posix_error(Error),
-    Error =:= eacces orelse Error =:= eagain orelse Error =:= ebadf orelse
-        Error =:= ebadmsg orelse Error =:= ebusy orelse Error =:= edeadlk orelse
-        Error =:= edeadlock orelse Error =:= edquot orelse Error =:= eexist orelse
-        Error =:= efault orelse Error =:= efbig orelse Error =:= eftype orelse
-        Error =:= eintr orelse Error =:= einval orelse Error =:= eio orelse
-        Error =:= eisdir orelse Error =:= eloop orelse Error =:= emfile orelse
-        Error =:= emlink orelse Error =:= emultihop orelse Error =:= enametoolong orelse
-        Error =:= enfile orelse Error =:= enobufs orelse Error =:= enodev orelse
-        Error =:= enolck orelse Error =:= enolink orelse Error =:= enoent orelse
-        Error =:= enomem orelse Error =:= enospc orelse Error =:= enosr orelse
-        Error =:= enostr orelse Error =:= enosys orelse Error =:= enotblk orelse
-        Error =:= enotdir orelse Error =:= enotsup orelse Error =:= enxio orelse
-        Error =:= eopnotsupp orelse Error =:= eoverflow orelse Error =:= eperm orelse
-        Error =:= epipe orelse Error =:= erange orelse Error =:= erofs orelse
-        Error =:= espipe orelse Error =:= esrch orelse Error =:= estale orelse
-        Error =:= etxtbsy orelse Error =:= exdev
-).
+        Error =:= eacces
+        orelse Error =:= eagain
+        orelse Error =:= ebadf
+        orelse Error =:= ebadmsg
+        orelse Error =:= ebusy
+        orelse Error =:= edeadlk
+        orelse Error =:= edeadlock
+        orelse Error =:= edquot
+        orelse Error =:= eexist
+        orelse Error =:= efault
+        orelse Error =:= efbig
+        orelse Error =:= eftype
+        orelse Error =:= eintr
+        orelse Error =:= einval
+        orelse Error =:= eio
+        orelse Error =:= eisdir
+        orelse Error =:= eloop
+        orelse Error =:= emfile
+        orelse Error =:= emlink
+        orelse Error =:= emultihop
+        orelse Error =:= enametoolong
+        orelse Error =:= enfile
+        orelse Error =:= enobufs
+        orelse Error =:= enodev
+        orelse Error =:= enolck
+        orelse Error =:= enolink
+        orelse Error =:= enoent
+        orelse Error =:= enomem
+        orelse Error =:= enospc
+        orelse Error =:= enosr
+        orelse Error =:= enostr
+        orelse Error =:= enosys
+        orelse Error =:= enotblk
+        orelse Error =:= enotdir
+        orelse Error =:= enotsup
+        orelse Error =:= enxio
+        orelse Error =:= eopnotsupp
+        orelse Error =:= eoverflow
+        orelse Error =:= eperm
+        orelse Error =:= epipe
+        orelse Error =:= erange
+        orelse Error =:= erofs
+        orelse Error =:= espipe
+        orelse Error =:= esrch
+        orelse Error =:= estale
+        orelse Error =:= etxtbsy
+        orelse Error =:= exdev).
 
 %% Only return the error if it's a posix error. Also converts ok to {ok, nil},
 %% as gleam doesn't have atoms.
 posix_result(Result) ->
     case Result of
-        ok -> {ok, nil};
-        {ok, Value} -> {ok, Value};
-        {error, Reason} when ?is_posix_error(Reason) -> {error, Reason}
+        ok ->
+            {ok, nil};
+        {ok, Value} ->
+            {ok, Value};
+        {error, Reason} when ?is_posix_error(Reason) ->
+            {error, Reason}
     end.
 
 %% Read the binary contents of a file
@@ -103,3 +125,33 @@ rename_file(Source, Destination) ->
 %% Set the permissions for the given file.
 set_permissions(Filename, Permissions) ->
     posix_result(file:change_mode(Filename, Permissions)).
+
+is_valid_directory(Path) ->
+    case file:read_file_info(Path) of
+        {ok, FileInfo} ->
+            case FileInfo#file_info.type of
+                directory ->
+                    {ok, true};
+                _ ->
+                    {ok, false}
+            end;
+        {error, enoent} ->
+            {ok, false};
+        {error, Reason} ->
+            posix_result({error, Reason})
+    end.
+
+is_valid_file(Path) ->
+    case file:read_file_info(Path) of
+        {ok, FileInfo} ->
+            case FileInfo#file_info.type of
+                regular ->
+                    {ok, true};
+                _ ->
+                    {ok, false}
+            end;
+        {error, enoent} ->
+            {ok, false};
+        {error, Reason} ->
+            posix_result({error, Reason})
+    end.
