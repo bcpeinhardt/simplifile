@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.3.1 - 27 January 2024
+- Update msg in deprecated tag for `is_file` to correctly point to `verify_is_file`.
+
 ## v1.3.0 - 26 January 2024
 - Deprecate `is_file` and `is_directory` in favor of `verify_is_file` and `verify_is_directory`,
   which error on lack of permissions rather than silently returning false.

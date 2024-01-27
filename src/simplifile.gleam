@@ -280,7 +280,7 @@ pub fn read_directory(at path: String) -> Result(List(String), FileError) {
 
 /// Returns `True` if there is a file at the given path, false otherwise.
 /// 
-@deprecated("Use `is_valid_file` instead")
+@deprecated("Use `verify_is_file` instead")
 pub fn is_file(filepath: String) -> Bool {
   do_is_file(filepath)
 }
