@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.4.1 - 1 February 2024
+- Update gleam_stdlib dependency to "~> 0.34 or ~> 1.0" in preparation for 1.0.
+
 ## v1.3.1 - 27 January 2024
 - Update msg in deprecated tag for `is_file` to correctly point to `verify_is_file`.
 
