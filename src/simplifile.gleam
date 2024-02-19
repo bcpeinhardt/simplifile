@@ -353,10 +353,7 @@ pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError) {
 }
 
 /// Copy a directory recursively
-pub fn copy_directory(
-  at src: String,
-  to dest: String,
-) -> Result(Nil, FileError) {
+pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError) {
   // Erlang does not provide a built in `copy_dir` function, 
   // and Deno doesn't support Node's `fs.cpSync`, so we'll just roll 
   // our own for now.
