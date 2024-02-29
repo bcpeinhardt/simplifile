@@ -191,6 +191,31 @@ export function currentDirectory() {
 }
 
 /**
+ * 
+ * @param {string} filepath 
+ * @returns {Ok | GError}
+ */
+export function fileInfo(filepath) {
+    return gleamResult(() => new FileInfo(filepath))
+}
+
+class FileInfo {
+    constructor(filepath) {
+        const stat = fs.statSync(path.normalize(filepath))
+        this.size = stat.size
+        this.mode = stat.mode
+        this.nlinks = stat.nlink
+        this.inode = stat.ino
+        this.userId = stat.uid
+        this.groupId = stat.gid
+        this.dev = stat.dev
+        this.atime = Math.floor(stat.atimeMs / 1000)
+        this.mtime = Math.floor(stat.mtimeMs / 1000)
+        this.ctime = Math.floor(stat.ctimeMs / 1000)
+    }
+}
+
+/**
  * Perform some operation and return a Gleam `Result(a, String)`
  * where `a` is the type returned by the operation and the `String`
  * is the error code.

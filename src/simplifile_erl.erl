@@ -7,7 +7,9 @@
 -module(simplifile_erl).
 
 %% API
-- export ( [ read_file / 1 , append_file / 2 , write_file / 2 , delete_file / 1 , delete_directory / 1 , recursive_delete / 1 , list_directory / 1 , make_directory / 1 , is_file / 1 , create_dir_all / 1 , rename_file / 2 , set_permissions / 2 , is_valid_directory / 1 , is_valid_file/1 ] ) .
+-export([read_file/1, append_file/2, write_file/2, delete_file/1, delete_directory/1,
+         recursive_delete/1, list_directory/1, make_directory/1, is_file/1, create_dir_all/1,
+         rename_file/2, set_permissions/2, is_valid_directory/1, is_valid_file/1, file_info/1]).
 
 -include_lib("kernel/include/file.hrl").
 
@@ -155,3 +157,40 @@ is_valid_file(Path) ->
         {error, Reason} ->
             posix_result({error, Reason})
     end.
+
+file_info_result(Result) ->
+    case Result of
+        {ok,
+         {file_info,
+          Size,
+          _Type,
+          _Access,
+          Atime,
+          Mtime,
+          Ctime,
+          Mode,
+          Links,
+          MajorDevice,
+          _MinorDevice,
+          Inode,
+          Uid,
+          Gid}} ->
+            {ok,
+             {file_info,
+              Size,
+              Mode,
+              Links,
+              Inode,
+              Uid,
+              Gid,
+              MajorDevice,
+              Atime,
+              Mtime,
+              Ctime}};
+        {error, Reason} when ?is_posix_error(Reason) ->
+            Result
+    end.
+
+file_info(Filename) ->
+    file_info_result(file:read_file_info(Filename, [{time, posix}])).
+

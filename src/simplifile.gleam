@@ -114,6 +114,55 @@ pub type FileError {
   Unknown
 }
 
+/// Represents the intersection of information available
+/// from erlang's `file:read_file_info` and node's `fs.stat`
+pub type FileInfo {
+  FileInfo(
+    /// File size in bytes.
+    size: Int,
+    /// File mode that indicates the file type and its permissions. 
+    /// For example, in Unix and Linux, a mode value of 33188 indicates 
+    /// a regular file and the permissions associated with it 
+    /// (read and write for the owner, and read-only for others, in 
+    /// this case).
+    mode: Int,
+    /// Number of hard links that exist for the file.
+    nlinks: Int,
+    /// Inode number, which is a unique identifier for the file in the filesystem.
+    inode: Int,
+    /// User ID of the file's owner.
+    user_id: Int,
+    /// Group ID of the file's group.
+    group_id: Int,
+    /// Device ID of the file's major device.
+    /// TODO: We can actually get a major device and minor device from both
+    /// node and erlang. The `fs.stat` in node returns a `dev` and `rdev`,
+    /// so we can use some bitwise operations to get the minor out of `rdev`.
+    /// Someone who's not me should totally make a PR for that.
+    dev: Int,
+    /// The last access time in seconds since the UNIX epoch (00:00:00 UTC on 1 January 1970).
+    atime_seconds: Int,
+    /// The last modification time in seconds since the UNIX epoch (00:00:00 UTC on 1 January 1970).
+    mtime_seconds: Int,
+    /// The last change time in seconds since the UNIX epoch (00:00:00 UTC on 1 January 1970).
+    ctime_seconds: Int,
+  )
+}
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "file_info")
+fn do_file_info(a: String) -> Result(FileInfo, FileError)
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "fileInfo")
+fn do_file_info(a: String) -> Result(FileInfo, String)
+
+/// Get information about a file at a given path
+pub fn file_info(a: String) -> Result(FileInfo, FileError) {
+  do_file_info(a)
+  |> cast_error
+}
+
 /// Read a files contents as a string
 /// ## Example
 /// ```gleam

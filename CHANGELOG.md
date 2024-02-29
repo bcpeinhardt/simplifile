@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.5.0 - 29 February 2024
+- add `file_info` function.
+
 ## v1.4.2 - 18 February 2024
 - Update msg in deprecated tag for `is_directory` to correctly point to `verify_is_directory`
 

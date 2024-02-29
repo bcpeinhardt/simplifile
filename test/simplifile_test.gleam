@@ -3,10 +3,10 @@ import gleeunit/should
 import simplifile.{
   Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
   append_bits, copy_directory, copy_file, create_directory, create_directory_all,
-  create_file, current_directory, delete, delete_all, file_permissions_to_octal,
-  get_files, read, read_bits, read_directory, rename_directory, rename_file,
-  set_permissions, set_permissions_octal, verify_is_directory, verify_is_file,
-  write, write_bits,
+  create_file, current_directory, delete, delete_all, file_info,
+  file_permissions_to_octal, get_files, read, read_bits, read_directory,
+  rename_directory, rename_file, set_permissions, set_permissions_octal,
+  verify_is_directory, verify_is_file, write, write_bits,
 }
 import gleam/list
 import gleam/int
@@ -383,22 +383,9 @@ pub fn no_read_permissions_test() {
   let assert Ok(Nil) = set_permissions_octal(parent_dir, 0o777)
   let assert Ok(Nil) = delete(parent_dir)
 }
-// pub fn is_file_and_is_dir_test() {
-//   let existing_file = "./gleam.toml"
-//   let existing_dir = "./test"
-//   let non_existing_file = "./i_dont_exist"
-//   let file_permission_issue = "/etc"
 
-//   let assert True = is_file(existing_file)
-//   let assert True = is_directory(existing_dir)
-
-//   let assert False = is_directory(existing_file)
-//   let assert False = is_file(existing_dir)
-
-//   let assert False = is_file(non_existing_file)
-//   let assert False = is_directory(non_existing_file)
-
-//   // let assert False = is_file(file_permission_issue)
-//   // This fails on javascript, because the permission error throws
-//   // let assert False = is_directory(file_permission_issue)
-// }
+pub fn file_info_test() {
+  let assert Ok(_info) = file_info("./test.sh")
+}
+/// I visually inspected this info to make sure it matched on all targets.
+/// TODO: Add a better test setup for validating file info functionality.
