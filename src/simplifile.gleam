@@ -177,7 +177,7 @@ pub fn read(from filepath: String) -> Result(String, FileError) {
 /// Write a string to a file at the given path
 /// ## Example
 /// ```gleam
-/// let assert Ok(Nil) = write("Hello, World!", to: "./hello_world.txt")
+/// let assert Ok(Nil) = write(to: "./hello_world.txt", contents: "Hello, World!")
 /// ```
 ///
 pub fn write(
@@ -221,7 +221,7 @@ pub fn delete_all(paths paths: List(String)) -> Result(Nil, FileError) {
 /// Append a string to the contents of a file at the given path
 /// ## Example
 /// ```gleam
-/// let assert Ok(Nil) = append("more text", to: "./needs_more_text.txt")
+/// let assert Ok(Nil) = append(to: "./needs_more_text.txt", contents: "more text")
 /// ```
 ///
 pub fn append(
@@ -246,7 +246,7 @@ pub fn read_bits(from filepath: String) -> Result(BitArray, FileError) {
 /// Write a bitstring to a file at the given path
 /// ## Example
 /// ```gleam
-/// let assert Ok(Nil) = write_bits(<<"Hello, World!":utf8>>, to: "./hello_world.txt")
+/// let assert Ok(Nil) = write_bits(to: "./hello_world.txt", bits: <<"Hello, World!":utf8>>)
 /// ```
 ///
 pub fn write_bits(
@@ -260,7 +260,7 @@ pub fn write_bits(
 /// Append a bitstring to the contents of a file at the given path
 /// ## Example
 /// ```gleam
-/// let assert Ok(Nil) = append_bits(<<"more text":utf8>>, to: "./needs_more_text.txt")
+/// let assert Ok(Nil) = append_bits(to: "./needs_more_text.txt", bits: <<"more text":utf8>>)
 /// ```
 ///
 pub fn append_bits(
