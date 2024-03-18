@@ -3,10 +3,10 @@ import gleeunit/should
 import simplifile.{
   Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
   append_bits, copy_directory, copy_file, create_directory, create_directory_all,
-  create_file, current_directory, delete, delete_all, file_info,
-  file_permissions_to_octal, get_files, read, read_bits, read_directory,
-  rename_directory, rename_file, set_permissions, set_permissions_octal,
-  verify_is_directory, verify_is_file, write, write_bits,
+  create_file, delete, delete_all, file_info, file_permissions_to_octal,
+  get_files, read, read_bits, read_directory, rename_directory, rename_file,
+  set_permissions, set_permissions_octal, verify_is_directory, verify_is_file,
+  write, write_bits,
 }
 import gleam/list
 import gleam/int
@@ -344,10 +344,11 @@ pub fn get_files_with_slash_test() {
   |> should.equal(["./test/simplifile_test.gleam"])
 }
 
-pub fn current_directory_test() {
-  Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile")
-  |> should.equal(current_directory())
-}
+// This test is only for local development
+// pub fn current_directory_test() {
+//   Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile")
+//   |> should.equal(current_directory())
+// }
 
 pub fn verify_is_file_and_is_dir_test() {
   let existing_file = "./gleam.toml"
