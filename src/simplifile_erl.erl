@@ -99,7 +99,7 @@ make_directory(Dir) ->
 list_directory(Dir) ->
     case file:list_dir(Dir) of
         {ok, Filenames} ->
-            {ok, [list_to_binary(Filename) || Filename <- Filenames]};
+            {ok, [unicode:characters_to_binary(Filename) || Filename <- Filenames]};
         {error, Reason} when ?is_posix_error(Reason) ->
             {error, Reason}
     end.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v1.5.1 - 22 March 2024
+- use unicode module to convert filenames to utf8 on erlang
+
 ## v1.5.0 - 29 February 2024
 - add `file_info` function.
 
