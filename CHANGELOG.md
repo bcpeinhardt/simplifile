@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## v1.6.0 - 26 March 2024
+- add the `clear_directory` function to make it easy to delete the 
+  contents of a directory while leaving the top level directory in place.
+- add the `filepath` dependency to clean up some code.
+
 ## v1.5.1 - 22 March 2024
 - use unicode module to convert filenames to utf8 on erlang
 

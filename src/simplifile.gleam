@@ -1,9 +1,11 @@
 import gleam/bit_array
-import gleam/string
 import gleam/result
 import gleam/list
 import gleam/set.{type Set}
 import gleam/int
+import filepath
+@target(erlang)
+import gleam/string
 
 /// This type represents all of the reasons for why a file system operation could fail.
 ///
@@ -375,14 +377,11 @@ pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
 /// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
 /// to pass only the path to the required directory.
 pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
-  let path = case
+  let path =
     dirpath
-    |> string.ends_with("/")
-  {
-    True -> dirpath
-    False -> dirpath <> "/"
-  }
-  do_create_dir_all(path)
+    |> filepath.split
+    |> list.fold("", filepath.join)
+  do_create_dir_all(path <> "/")
   |> cast_error
 }
 
@@ -415,8 +414,8 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
   use segments <- result.try(read_directory(src))
   segments
   |> list.each(fn(segment) {
-    let src_path = src <> "/" <> segment
-    let dest_path = dest <> "/" <> segment
+    let src_path = filepath.join(src, segment)
+    let dest_path = filepath.join(dest, segment)
 
     case verify_is_file(src_path), verify_is_directory(src_path) {
       Ok(True), Ok(False) -> {
@@ -451,21 +450,23 @@ pub fn rename_directory(
   delete(src)
 }
 
+/// Clear the contents of a directory, deleting all files and directories within
+/// but leaving the top level directory in place.
+pub fn clear_directory(at path: String) -> Result(Nil, FileError) {
+  use paths <- result.try(read_directory(path))
+  paths
+  |> list.map(filepath.join(path, _))
+  |> delete_all
+}
+
 /// Returns a list of filepaths for every file in the directory, including nested
 /// files.
 /// 
 pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use contents <- result.try(read_directory(directory))
   let paths =
-    list.map(contents, fn(segment) {
-      case
-        directory
-        |> string.ends_with("/")
-      {
-        True -> directory <> segment
-        False -> directory <> "/" <> segment
-      }
-    })
+    contents
+    |> list.map(filepath.join(directory, _))
   let files = list.filter(paths, fn(path) { verify_is_file(path) == Ok(True) })
   case list.filter(paths, fn(path) { verify_is_directory(path) == Ok(True) }) {
     [] -> Ok(files)

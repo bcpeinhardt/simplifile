@@ -388,5 +388,18 @@ pub fn no_read_permissions_test() {
 pub fn file_info_test() {
   let assert Ok(_info) = file_info("./test.sh")
 }
+
 /// I visually inspected this info to make sure it matched on all targets.
 /// TODO: Add a better test setup for validating file info functionality.
+pub fn clear_directory_test() {
+  let assert Ok(_) = create_directory_all("./tmp/clear_dir")
+  let assert Ok(_) = create_directory_all("./tmp/clear_dir/nested_dir")
+  let assert Ok(_) = create_file("./tmp/clear_dir/test.txt")
+  let assert Ok(_) = create_file("./tmp/clear_dir/nested_dir/test.txt")
+
+  let assert Ok(_) = simplifile.clear_directory("./tmp/clear_dir")
+  verify_is_directory("./tmp/clear_dir")
+  |> should.equal(Ok(True))
+  let assert Ok([]) = read_directory("./tmp/clear_dir")
+  let assert Ok(_) = delete("./tmp/clear_dir")
+}
