@@ -3,7 +3,8 @@
 [![Package Version](https://img.shields.io/hexpm/v/simplifile)](https://hex.pm/packages/simplifile)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/simplifile/)
 
-Simplifile provides synchronous operations for working with files and directories that work for all targets (Erlang, Node, and Deno). 
+Simplifile provides synchronous operations for working with files and directories that work for all 
+non-browser targets (Erlang, Node, Deno, and Bun). 
 
 ## When should I use `simplifile`?
 
