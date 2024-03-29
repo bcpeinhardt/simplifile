@@ -1,3 +1,6 @@
+import gleam/int
+import gleam/list
+import gleam/set
 import gleeunit
 import gleeunit/should
 import simplifile.{
@@ -8,9 +11,6 @@ import simplifile.{
   set_permissions, set_permissions_octal, verify_is_directory, verify_is_file,
   write, write_bits,
 }
-import gleam/list
-import gleam/int
-import gleam/set
 
 // import gleam/io
 

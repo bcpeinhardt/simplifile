@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## v1.6.1 - 28 March 2024
+- fix bug I introduced to `clear_directory_all` which accidentally made absolute directories
+  relative.
+
 ## v1.6.0 - 26 March 2024
 - add the `clear_directory` function to make it easy to delete the 
   contents of a directory while leaving the top level directory in place.

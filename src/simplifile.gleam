@@ -1,9 +1,9 @@
-import gleam/bit_array
-import gleam/result
-import gleam/list
-import gleam/set.{type Set}
-import gleam/int
 import filepath
+import gleam/bit_array
+import gleam/int
+import gleam/list
+import gleam/result
+import gleam/set.{type Set}
 @target(erlang)
 import gleam/string
 
@@ -377,10 +377,15 @@ pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
 /// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
 /// to pass only the path to the required directory.
 pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
+  let is_abs = filepath.is_absolute(dirpath)
   let path =
     dirpath
     |> filepath.split
     |> list.fold("", filepath.join)
+  let path = case is_abs {
+    True -> "/" <> path
+    False -> path
+  }
   do_create_dir_all(path <> "/")
   |> cast_error
 }
