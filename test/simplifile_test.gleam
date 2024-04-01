@@ -146,6 +146,10 @@ pub fn is_directory_test() {
 pub fn is_symlink_test() {
   let the_target = "./tmp/target_of_created_symlink"
   let the_symlink = "./tmp/created_symlink"
+  let existing_file_target_for_symlink = "existing_file_target_for_symlink"
+  let symlink_to_existing_file = "./tmp/symlink_to_existing_file"
+  let existing_dir_target_for_symlink = "existing_dir_target_for_symlink"
+  let symlink_to_existing_dir = "./tmp/symlink_to_existing_dir"
   let filepath = "./tmp/is_file_test.txt"
   let assert Ok(_) =
     ""
@@ -153,16 +157,38 @@ pub fn is_symlink_test() {
   let assert Ok(_) = create_symlink(the_target, the_symlink)
   let assert Ok(True) = verify_is_symlink(the_symlink)
   let assert Ok(False) = verify_is_symlink("./does_not_exist")
-  // A symlink is not a file
+  // A symlink is not a file if the target doesn't exist
   let assert Ok(False) = verify_is_file(the_symlink)
-  // A symlink is not a directory
+  // A symlink is a file if the file target does exist
+  let assert Ok(_) =
+    ""
+    |> write(to: "./tmp/" <> existing_file_target_for_symlink)
+  let assert Ok(_) =
+    create_symlink(existing_file_target_for_symlink, symlink_to_existing_file)
+  let assert Ok(True) = verify_is_symlink(symlink_to_existing_file)
+  let assert Ok(True) = verify_is_file(symlink_to_existing_file)
+  let assert Ok(False) = verify_is_directory(symlink_to_existing_file)
+  // A symlink is not a directory if the target doesn't exist
   let assert Ok(False) = verify_is_directory(the_symlink)
+  // A symlink is a directory if the directory target does exist
+  let assert Ok(_) =
+    create_directory("./tmp/" <> existing_dir_target_for_symlink)
+  let assert Ok(_) =
+    create_symlink(existing_dir_target_for_symlink, symlink_to_existing_dir)
+  let assert Ok(True) = verify_is_symlink(symlink_to_existing_dir)
+  let assert Ok(True) = verify_is_directory(symlink_to_existing_dir)
+  let assert Ok(False) = verify_is_file(symlink_to_existing_dir)
   // A file is not a symlink
   let assert Ok(False) = verify_is_symlink(filepath)
   // A directory is not a symlink
   let assert Ok(False) = verify_is_symlink("./tmp/")
+  // Clean everything
   let assert Ok(_) = delete(the_symlink)
   let assert Ok(_) = delete(file_or_dir_at: filepath)
+  let assert Ok(_) = delete("./tmp/" <> existing_file_target_for_symlink)
+  let assert Ok(_) = delete(symlink_to_existing_file)
+  let assert Ok(_) = delete("./tmp/" <> existing_dir_target_for_symlink)
+  let assert Ok(_) = delete(symlink_to_existing_dir)
 }
 
 pub fn create_all_test() {
