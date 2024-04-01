@@ -316,6 +316,17 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
   |> cast_error
 }
 
+/// Create a symbolic link called symlink pointing to target.
+///
+/// ## Example
+/// ```gleam
+/// create_symlink("../target", "./symlink")
+/// ```
+pub fn create_symlink(target: String, symlink: String) -> Result(Nil, FileError) {
+  do_make_symlink(target, symlink)
+  |> cast_error
+}
+
 /// Lists the contents of a directory.
 /// The list contains directory and file names, and is not recursive.
 /// 
@@ -356,6 +367,27 @@ fn do_verify_is_file(filepath: String) -> Result(Bool, String)
 @target(erlang)
 @external(erlang, "simplifile_erl", "is_valid_file")
 fn do_verify_is_file(filepath: String) -> Result(Bool, FileError)
+
+/// Checks if the file at the provided filepath exists and is a symbolic link.
+/// Returns an Error if it lacks permissions to read the file.
+///
+/// ## Example
+/// ```gleam
+/// let assert Ok(True) = verify_is_symlink("./symlink")
+/// ```
+///
+pub fn verify_is_symlink(filepath: String) -> Result(Bool, FileError) {
+  do_verify_is_symlink(filepath)
+  |> cast_error
+}
+
+@target(javascript)
+@external(javascript, "./simplifile_js.mjs", "isValidSymlink")
+fn do_verify_is_symlink(filepath: String) -> Result(Bool, String)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "is_valid_symlink")
+fn do_verify_is_symlink(filepath: String) -> Result(Bool, FileError)
 
 /// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
 /// if the file already exists.
@@ -637,6 +669,10 @@ fn do_is_directory(filepath: String) -> Bool
 fn do_make_directory(filepath: String) -> Result(Nil, String)
 
 @target(javascript)
+@external(javascript, "./simplifile_js.mjs", "makeSymlink")
+fn do_make_symlink(target: String, symlink: String) -> Result(Nil, String)
+
+@target(javascript)
 @external(javascript, "./simplifile_js.mjs", "createDirAll")
 fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
 
@@ -770,6 +806,10 @@ fn do_is_directory(path: String) -> Bool
 @target(erlang)
 @external(erlang, "simplifile_erl", "make_directory")
 fn do_make_directory(directory: String) -> Result(Nil, FileError)
+
+@target(erlang)
+@external(erlang, "simplifile_erl", "make_symlink")
+fn do_make_symlink(target: String, symlink: String) -> Result(Nil, FileError)
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "list_directory")
