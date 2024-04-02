@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- add `describe_error` function to get human-readable descriptions out of errors
 
 ## v1.6.1 - 28 March 2024
 - fix bug I introduced to `clear_directory_all` which accidentally made absolute directories
