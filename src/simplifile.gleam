@@ -116,6 +116,66 @@ pub type FileError {
   Unknown
 }
 
+/// Convert an error into a human-readable description
+/// ## Example
+/// ```gleam
+/// let assert "Input/output error" = describe_error(Eio)
+/// ```
+///
+pub fn describe_error(error: FileError) -> String {
+  case error {
+    Eperm -> "Operation not permitted"
+    Enoent -> "No such file or directory"
+    Esrch -> "No such process"
+    Eintr -> "Interrupted system call"
+    Eio -> "Input/output error"
+    Enxio -> "Device not configured"
+    Ebadf -> "Bad file descriptor"
+    Edeadlk -> "Resource deadlock avoided"
+    Edeadlock -> "Resource deadlock avoided"
+    Enomem -> "Cannot allocate memory"
+    Eacces -> "Permission denied"
+    Efault -> "Bad address"
+    Enotblk -> "Block device required"
+    Ebusy -> "Resource busy"
+    Eexist -> "File exists"
+    Exdev -> "Cross-device link"
+    Enodev -> "Operation not supported by device"
+    Enotdir -> "Not a directory"
+    Eisdir -> "Is a directory"
+    Einval -> "Invalid argument"
+    Enfile -> "Too many open files in system"
+    Emfile -> "Too many open files"
+    Etxtbsy -> "Text file busy"
+    Efbig -> "File too large"
+    Enospc -> "No space left on device"
+    Espipe -> "Illegal seek"
+    Erofs -> "Read-only file system"
+    Emlink -> "Too many links"
+    Epipe -> "Broken pipe"
+    Erange -> "Result too large"
+    Eagain -> "Resource temporarily unavailable"
+    Enotsup -> "Operation not supported"
+    Enobufs -> "No buffer space available"
+    Eloop -> "Too many levels of symbolic links"
+    Enametoolong -> "File name too long"
+    Edquot -> "Disc quota exceeded"
+    Estale -> "Stale NFS file handle"
+    Enolck -> "No locks available"
+    Enosys -> "Function not implemented"
+    Eftype -> "Inappropriate file type or format"
+    Eoverflow -> "Value too large to be stored in data type"
+    Ebadmsg -> "Bad message"
+    Emultihop -> "Multihop attempted"
+    Enolink -> "Link has been severed"
+    Enosr -> "No STREAM resources"
+    Enostr -> "Not a STREAM"
+    Eopnotsupp -> "Operation not supported on socket"
+    NotUtf8 -> "File not UTF-8 encoded"
+    Unknown -> "Unknown error"
+  }
+}
+
 /// Represents the intersection of information available
 /// from erlang's `file:read_file_info` and node's `fs.stat`
 pub type FileInfo {
