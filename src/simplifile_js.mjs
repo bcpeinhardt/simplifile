@@ -4,6 +4,7 @@ import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"
 import { BitArray, Ok, Error as GError, toList} from "./gleam.mjs";
+import { verify_is_directory } from "./simplifile.mjs";
 
 /**
  * Read the contents of a file as a BitArray 
@@ -71,6 +72,24 @@ export function isValidFile(filepath) {
 }
 
 /**
+ * Check whether a symbolic link exists at the given path
+ *
+ * @param {string} filepath
+ * @returns {Ok | GError}
+ */
+export function isValidSymlink(filepath) {
+    try {
+        return new Ok(fs.lstatSync(path.normalize(filepath)).isSymbolicLink());
+    } catch (e) {
+        if (e.code === 'ENOENT') {
+            return new Ok(false);
+        } else {
+            return new GError(e.code);
+        }
+    }
+}
+
+/**
  * Check whether a directory exists at the given path
  * 
  * @deprecated Use `isValidDirectory` instead
@@ -98,6 +117,17 @@ export function isValidDirectory(filepath) {
             return new GError(e.code);
         }
     }
+}
+
+/**
+ * Create the symbolic link called path pointing to target
+ *
+ * @param {string} target
+ * @param {string} path
+ * @returns {Ok | GError}
+ */
+export function makeSymlink(target, path) {
+    return gleamResult(() => fs.symlinkSync(target, path))
 }
 
 /**
@@ -130,7 +160,8 @@ export function createDirAll(filepath) {
  */
 export function deleteFileOrDirRecursive(fileOrDirPath) {
     return gleamResult(() => {
-        if (isDirectory(fileOrDirPath)) {
+        const isDir = isValidDirectory(fileOrDirPath)
+        if (isDir instanceof Ok && isDir[0] === true) {
             fs.rmSync(path.normalize(fileOrDirPath), { recursive: true })
         } else {
             fs.unlinkSync(path.normalize(fileOrDirPath))

@@ -6,13 +6,11 @@ import gleeunit/should
 import simplifile.{
   Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
   append_bits, copy_directory, copy_file, create_directory, create_directory_all,
-  create_file, delete, delete_all, file_info, file_permissions_to_octal,
-  get_files, read, read_bits, read_directory, rename_directory, rename_file,
-  set_permissions, set_permissions_octal, verify_is_directory, verify_is_file,
-  write, write_bits,
+  create_file, create_symlink, delete, delete_all, file_info,
+  file_permissions_to_octal, get_files, read, read_bits, read_directory,
+  rename_directory, rename_file, set_permissions, set_permissions_octal,
+  verify_is_directory, verify_is_file, verify_is_symlink, write, write_bits,
 }
-
-// import gleam/io
 
 pub fn main() {
   let assert Ok(_) = delete_all(["./tmp"])
@@ -76,6 +74,24 @@ pub fn make_directory_test() {
   let assert Ok(_) = delete(the_directory)
 }
 
+pub fn make_symlink_test() {
+  let the_target = "target_of_created_symlink"
+  let the_symlink = "./tmp/created_symlink"
+  let assert Ok(_) = create_symlink(the_target, the_symlink)
+  let assert Error(_) = create_symlink(the_target, the_symlink)
+  // /!\ with Deno runtime:
+  //   if the symlink has been created with a non existing target,
+  //   the symlink cannot be deleted (??).
+  //   So we first create the target,
+  //   then we delete the symlink,
+  //   and finally we delete the target
+  let assert Ok(_) =
+    ""
+    |> write(to: "./tmp/" <> the_target)
+  let assert Ok(_) = delete(the_symlink)
+  let assert Ok(_) = delete("./tmp/" <> the_target)
+}
+
 pub fn read_directory_test() {
   // Test setup
   let test_dir = "./tmp/test_dir"
@@ -133,6 +149,54 @@ pub fn is_directory_test() {
 
   // A file is not a directory
   let assert Ok(False) = verify_is_directory("./simplifile.gleam")
+}
+
+pub fn is_symlink_test() {
+  let the_target = "target_of_created_symlink"
+  let the_symlink = "./tmp/created_symlink"
+  let existing_file_target_for_symlink = "existing_file_target_for_symlink"
+  let symlink_to_existing_file = "./tmp/symlink_to_existing_file"
+  let existing_dir_target_for_symlink = "existing_dir_target_for_symlink"
+  let symlink_to_existing_dir = "./tmp/symlink_to_existing_dir"
+  let filepath = "./tmp/is_file_test.txt"
+  let assert Ok(_) =
+    ""
+    |> write(to: filepath)
+  let assert Ok(_) = create_symlink(the_target, the_symlink)
+  let assert Ok(True) = verify_is_symlink(the_symlink)
+  let assert Ok(False) = verify_is_symlink("./does_not_exist")
+  // A symlink is not a file if the target doesn't exist
+  let assert Ok(False) = verify_is_file(the_symlink)
+  // A symlink is a file if the file target does exist
+  let assert Ok(_) =
+    ""
+    |> write(to: "./tmp/" <> existing_file_target_for_symlink)
+  let assert Ok(_) =
+    create_symlink(existing_file_target_for_symlink, symlink_to_existing_file)
+  let assert Ok(True) = verify_is_symlink(symlink_to_existing_file)
+  let assert Ok(True) = verify_is_file(symlink_to_existing_file)
+  let assert Ok(False) = verify_is_directory(symlink_to_existing_file)
+  // A symlink is not a directory if the target doesn't exist
+  let assert Ok(False) = verify_is_directory(the_symlink)
+  // A symlink is a directory if the directory target does exist
+  let assert Ok(_) =
+    create_directory("./tmp/" <> existing_dir_target_for_symlink)
+  let assert Ok(_) =
+    create_symlink(existing_dir_target_for_symlink, symlink_to_existing_dir)
+  let assert Ok(True) = verify_is_symlink(symlink_to_existing_dir)
+  let assert Ok(True) = verify_is_directory(symlink_to_existing_dir)
+  let assert Ok(False) = verify_is_file(symlink_to_existing_dir)
+  // A file is not a symlink
+  let assert Ok(False) = verify_is_symlink(filepath)
+  // A directory is not a symlink
+  let assert Ok(False) = verify_is_symlink("./tmp/")
+  // Clean everything
+  let assert Ok(_) = delete(file_or_dir_at: filepath)
+  let assert Ok(_) = delete(symlink_to_existing_file)
+  let assert Ok(_) = delete("./tmp/" <> existing_file_target_for_symlink)
+  let assert Ok(_) = delete(symlink_to_existing_dir)
+  let assert Ok(_) = delete("./tmp/" <> existing_dir_target_for_symlink)
+  let assert Ok(_) = delete(the_symlink)
 }
 
 pub fn create_all_test() {
@@ -241,6 +305,21 @@ pub fn delete_test() {
 
   // Deleting a file that doesn't exist throws an error
   let assert Error(Enoent) = delete("./idontexist")
+
+  // Delete a symlink doesn't delete the target
+  let the_target = "target_of_created_symlink"
+  let the_symlink = "./tmp/created_symlink"
+  let assert Ok(_) =
+    ""
+    |> write(to: "./tmp/" <> the_target)
+  let assert Ok(_) = create_symlink(the_target, the_symlink)
+  let assert Ok(True) = verify_is_file("./tmp/" <> the_target)
+  let assert Ok(True) = verify_is_symlink(the_symlink)
+  let assert Ok(_) = delete(the_symlink)
+  let assert Ok(False) = verify_is_symlink(the_symlink)
+  let assert Ok(True) = verify_is_file("./tmp/" <> the_target)
+  let assert Ok(_) = delete(file_or_dir_at: "./tmp/" <> the_target)
+  let assert Ok(False) = verify_is_file("./tmp/" <> the_target)
 }
 
 pub fn delete_all_test() {
@@ -402,4 +481,11 @@ pub fn clear_directory_test() {
   |> should.equal(Ok(True))
   let assert Ok([]) = read_directory("./tmp/clear_dir")
   let assert Ok(_) = delete("./tmp/clear_dir")
+}
+
+pub fn deno_symlink_error_test() {
+  let assert Ok(_) = create_file("./tmp/target.txt")
+  let assert Ok(_) =
+    create_symlink(from: "./tmp/simulated", to: "./tmp/target.txt")
+  let assert Ok(_) = delete("./tmp/simulated")
 }

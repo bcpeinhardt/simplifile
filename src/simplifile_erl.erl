@@ -8,8 +8,9 @@
 
 %% API
 -export([read_file/1, append_file/2, write_file/2, delete_file/1, delete_directory/1,
-         recursive_delete/1, list_directory/1, make_directory/1, is_file/1, create_dir_all/1,
-         rename_file/2, set_permissions/2, is_valid_directory/1, is_valid_file/1, file_info/1]).
+         recursive_delete/1, list_directory/1, make_directory/1, make_symlink/2,
+         is_file/1, create_dir_all/1, rename_file/2, set_permissions/2,
+         is_valid_directory/1, is_valid_file/1, is_valid_symlink/1, file_info/1]).
 
 -include_lib("kernel/include/file.hrl").
 
@@ -95,6 +96,10 @@ delete_file(Filename) ->
 make_directory(Dir) ->
     posix_result(file:make_dir(Dir)).
 
+%% Create a symbolic link New to the file or directory Existing (does not need to exist).
+make_symlink(Existing, New) ->
+    posix_result(file:make_symlink(Existing, New)).
+
 %% List the contents of a directory
 list_directory(Dir) ->
     case file:list_dir(Dir) of
@@ -148,6 +153,21 @@ is_valid_file(Path) ->
         {ok, FileInfo} ->
             case FileInfo#file_info.type of
                 regular ->
+                    {ok, true};
+                _ ->
+                    {ok, false}
+            end;
+        {error, enoent} ->
+            {ok, false};
+        {error, Reason} ->
+            posix_result({error, Reason})
+    end.
+
+is_valid_symlink(Path) ->
+    case file:read_link_info(Path) of
+        {ok, FileInfo} ->
+            case FileInfo#file_info.type of
+                symlink ->
                     {ok, true};
                 _ ->
                     {ok, false}
