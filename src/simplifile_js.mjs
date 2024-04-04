@@ -4,6 +4,7 @@ import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"
 import { BitArray, Ok, Error as GError, toList} from "./gleam.mjs";
+import { verify_is_directory } from "./simplifile.mjs";
 
 /**
  * Read the contents of a file as a BitArray 
@@ -159,7 +160,8 @@ export function createDirAll(filepath) {
  */
 export function deleteFileOrDirRecursive(fileOrDirPath) {
     return gleamResult(() => {
-        if (isDirectory(fileOrDirPath)) {
+        const isDir = isValidDirectory(fileOrDirPath)
+        if (isDir instanceof Ok && isDir[0] === true) {
             fs.rmSync(path.normalize(fileOrDirPath), { recursive: true })
         } else {
             fs.unlinkSync(path.normalize(fileOrDirPath))

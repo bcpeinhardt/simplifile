@@ -382,7 +382,10 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
 /// ```gleam
 /// create_symlink("../target", "./symlink")
 /// ```
-pub fn create_symlink(target: String, symlink: String) -> Result(Nil, FileError) {
+pub fn create_symlink(
+  to target: String,
+  from symlink: String,
+) -> Result(Nil, FileError) {
   do_make_symlink(target, symlink)
   |> cast_error
 }

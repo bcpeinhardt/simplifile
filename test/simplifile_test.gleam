@@ -12,8 +12,6 @@ import simplifile.{
   verify_is_directory, verify_is_file, verify_is_symlink, write, write_bits,
 }
 
-// import gleam/io
-
 pub fn main() {
   let assert Ok(_) = delete_all(["./tmp"])
   let assert Ok(_) = create_directory("./tmp")
@@ -198,17 +196,7 @@ pub fn is_symlink_test() {
   let assert Ok(_) = delete("./tmp/" <> existing_file_target_for_symlink)
   let assert Ok(_) = delete(symlink_to_existing_dir)
   let assert Ok(_) = delete("./tmp/" <> existing_dir_target_for_symlink)
-  // /!\ with Deno runtime:
-  //   if the symlink has been created with a non existing target,
-  //   the symlink cannot be deleted (??).
-  //   So we first create the target,
-  //   then we delete the symlink,
-  //   and finally we delete the target
-  let assert Ok(_) =
-    ""
-    |> write(to: "./tmp/" <> the_target)
   let assert Ok(_) = delete(the_symlink)
-  let assert Ok(_) = delete(file_or_dir_at: "./tmp/" <> the_target)
 }
 
 pub fn create_all_test() {
@@ -493,4 +481,11 @@ pub fn clear_directory_test() {
   |> should.equal(Ok(True))
   let assert Ok([]) = read_directory("./tmp/clear_dir")
   let assert Ok(_) = delete("./tmp/clear_dir")
+}
+
+pub fn deno_symlink_error_test() {
+  let assert Ok(_) = create_file("./tmp/target.txt")
+  let assert Ok(_) =
+    create_symlink(from: "./tmp/simulated", to: "./tmp/target.txt")
+  let assert Ok(_) = delete("./tmp/simulated")
 }
