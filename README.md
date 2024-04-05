@@ -39,3 +39,11 @@ gleam add simplifile
 ```
 
 and its documentation can be found at <https://hexdocs.pm/simplifile>.
+
+## Contributing
+
+Contributions are welcome! The best way to start for medium to large features is by opening an issue with
+the feature suggestion, otherwise feel free to just make a PR!
+Code contributions should include tests. Please make sure tests pass on all supported targets
+(you can run the test.sh file in the top level of the project to run tests for each target).
+Please also include an entry in the Unreleased section of the changelog.
