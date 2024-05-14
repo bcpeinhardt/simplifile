@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- improve performance of `get_files`
+
 ## v1.7.0 - 5 April 2024
 - add `create_symlink` function to create a symbolic link
 - add `verify_is_symlink` function to check if a file is a symbolic link
@@ -12,7 +14,7 @@
   relative.
 
 ## v1.6.0 - 26 March 2024
-- add the `clear_directory` function to make it easy to delete the 
+- add the `clear_directory` function to make it easy to delete the
   contents of a directory while leaving the top level directory in place.
 - add the `filepath` dependency to clean up some code.
 
@@ -90,8 +92,8 @@
 - Small refactor to remove js functions `writeFile` and `appendFile`
 
 ## v0.1.7 - 31 July 2023
-- Fix bug where `read` was incorrectly returning non utf8 content for string on 
-    javascript target. Now returns correct `NonUtf8` error
+- Fix bug where `read` was incorrectly returning non utf8 content for string on
+  javascript target. Now returns correct `NonUtf8` error
 
 ## v0.1.6 - 19 July 2023
 - Add `make_directory` and `delete_directory` functions for working with directories.
@@ -110,4 +112,4 @@
 
 ## v0.1.1 - 31 May 2023
 - Refactored to match gleam idiom of ffi "do" functions and single signature.
-- Added documentation about the utf8 issue with the read function. 
+- Added documentation about the utf8 issue with the read function.

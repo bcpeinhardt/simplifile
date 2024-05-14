@@ -182,10 +182,10 @@ pub type FileInfo {
   FileInfo(
     /// File size in bytes.
     size: Int,
-    /// File mode that indicates the file type and its permissions. 
-    /// For example, in Unix and Linux, a mode value of 33188 indicates 
-    /// a regular file and the permissions associated with it 
-    /// (read and write for the owner, and read-only for others, in 
+    /// File mode that indicates the file type and its permissions.
+    /// For example, in Unix and Linux, a mode value of 33188 indicates
+    /// a regular file and the permissions associated with it
+    /// (read and write for the owner, and read-only for others, in
     /// this case).
     mode: Int,
     /// Number of hard links that exist for the file.
@@ -265,9 +265,9 @@ pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError) {
 
 /// Delete all files/directories specified in a list of paths.
 /// Recursively deletes provided directories.
-/// Does not return an error if one or more of the provided paths 
-/// do not exist. 
-/// 
+/// Does not return an error if one or more of the provided paths
+/// do not exist.
+///
 pub fn delete_all(paths paths: List(String)) -> Result(Nil, FileError) {
   case paths {
     [] -> Ok(Nil)
@@ -338,7 +338,7 @@ pub fn append_bits(
 /// ```gleam
 /// let assert True = is_directory("./test")
 /// ```
-/// 
+///
 @deprecated("Use `verify_is_directory` instead")
 pub fn is_directory(filepath: String) -> Bool {
   do_is_directory(filepath)
@@ -346,7 +346,7 @@ pub fn is_directory(filepath: String) -> Bool {
 
 /// Checks if the provided filepath exists and is a directory.
 /// Returns an error if it lacks permissions to read the directory.
-/// 
+///
 /// ## Example
 /// ```gleam
 /// let assert Ok(True) = verify_is_directory("./test")
@@ -392,19 +392,19 @@ pub fn create_symlink(
 
 /// Lists the contents of a directory.
 /// The list contains directory and file names, and is not recursive.
-/// 
+///
 /// ## Example
 /// ```gleam
 /// let assert Ok(files_and_folders) = read_directory(at: "./Folder1")
 /// ```
-/// 
+///
 pub fn read_directory(at path: String) -> Result(List(String), FileError) {
   do_read_directory(path)
   |> cast_error
 }
 
 /// Returns `True` if there is a file at the given path, false otherwise.
-/// 
+///
 @deprecated("Use `verify_is_file` instead")
 pub fn is_file(filepath: String) -> Bool {
   do_is_file(filepath)
@@ -412,7 +412,7 @@ pub fn is_file(filepath: String) -> Bool {
 
 /// Checks if the file at the provided filepath exists and is a file.
 /// Returns an Error if it lacks permissions to read the file.
-/// 
+///
 /// ## Example
 /// ```gleam
 /// let assert Ok(True) = verify_is_file("./test.txt")
@@ -454,7 +454,7 @@ fn do_verify_is_symlink(filepath: String) -> Result(Bool, FileError)
 
 /// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
 /// if the file already exists.
-/// 
+///
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
   case
     filepath
@@ -502,8 +502,8 @@ pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError) {
 
 /// Copy a directory recursively
 pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError) {
-  // Erlang does not provide a built in `copy_dir` function, 
-  // and Deno doesn't support Node's `fs.cpSync`, so we'll just roll 
+  // Erlang does not provide a built in `copy_dir` function,
+  // and Deno doesn't support Node's `fs.cpSync`, so we'll just roll
   // our own for now.
   use _ <- result.try(create_directory_all(dest))
   do_copy_directory(src, dest)
@@ -561,19 +561,24 @@ pub fn clear_directory(at path: String) -> Result(Nil, FileError) {
 
 /// Returns a list of filepaths for every file in the directory, including nested
 /// files.
-/// 
+///
 pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use contents <- result.try(read_directory(directory))
-  let paths =
-    contents
-    |> list.map(filepath.join(directory, _))
-  let files = list.filter(paths, fn(path) { verify_is_file(path) == Ok(True) })
-  case list.filter(paths, fn(path) { verify_is_directory(path) == Ok(True) }) {
-    [] -> Ok(files)
-    directories -> {
-      use nested_files <- result.try(list.try_map(directories, get_files))
-      Ok(list.append(files, list.flatten(nested_files)))
-    }
+  use acc, content <- list.try_fold(over: contents, from: [])
+  let path = filepath.join(directory, content)
+
+  case verify_is_file(path) {
+    Error(e) -> Error(e)
+    Ok(True) -> Ok([path, ..acc])
+    Ok(False) ->
+      case verify_is_directory(path) {
+        Error(e) -> Error(e)
+        Ok(False) -> Ok(acc)
+        Ok(True) -> {
+          use nested_files <- result.try(get_files(path))
+          Ok(list.append(acc, nested_files))
+        }
+      }
   }
 }
 
@@ -617,7 +622,7 @@ pub fn file_permissions_to_octal(permissions: FilePermissions) -> Int {
 }
 
 /// Sets the permissions for a given file
-/// 
+///
 /// # Example
 /// ```gleam
 /// let all = set.from_list([Read, Write, Execute])
@@ -632,7 +637,7 @@ pub fn set_permissions(
 }
 
 /// Sets the permissions for a given file using an octal representation
-/// 
+///
 /// # Example
 /// ```gleam
 /// set_permissions_octal("./script.sh", 0o777)
@@ -646,7 +651,7 @@ pub fn set_permissions_octal(
 }
 
 /// Returns the current working directory
-/// 
+///
 pub fn current_directory() -> Result(String, FileError) {
   do_current_directory()
   |> cast_error
