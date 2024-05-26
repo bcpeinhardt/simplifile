@@ -113,7 +113,7 @@ pub type FileError {
   /// File was requested to be read as UTF-8, but is not UTF-8 encoded.
   NotUtf8
   /// Any error not accounted for by this type
-  Unknown
+  Unknown(inner: String)
 }
 
 /// Convert an error into a human-readable description
@@ -172,7 +172,7 @@ pub fn describe_error(error: FileError) -> String {
     Enostr -> "Not a STREAM"
     Eopnotsupp -> "Operation not supported on socket"
     NotUtf8 -> "File not UTF-8 encoded"
-    Unknown -> "Unknown error"
+    Unknown(inner) -> "Unknown error: " <> inner
   }
 }
 
@@ -529,12 +529,14 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
         use _ <- result.try(create_directory(dest_path))
         do_copy_directory(src_path, dest_path)
       }
-      Error(e), _ | _, Error(e) -> {
+      Error(e), _
+      | _, Error(e) -> {
         Error(e)
       }
-      Ok(False), Ok(False) | Ok(True), Ok(True) -> {
+      Ok(False), Ok(False)
+      | Ok(True), Ok(True) -> {
         // We're really not sure how that one happened.
-        Error(Unknown)
+        Error(Unknown("Unknown error copying directory"))
       }
     }
   })
@@ -808,7 +810,7 @@ fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
       "ETXTBSY" -> Etxtbsy
       "EXDEV" -> Exdev
       "NOTUTF8" -> NotUtf8
-      _ -> Unknown
+      str -> Unknown(str)
     }
   })
 }

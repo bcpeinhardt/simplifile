@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Add underlying string as context to `Unknown` error
 - improve performance of `get_files`
 
 ## v1.7.0 - 5 April 2024
