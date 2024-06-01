@@ -3,8 +3,10 @@
 ## Unreleased
 
 ## v2.0.0 - 1 June 2024
-- Fix mapping of fileinfo attr name in JS
-- Add underlying string as context to `Unknown` error
+- `verify_is_directory`, `verify_is_file`, `verify_is_symlink` become 
+  `is_directory`, `is_file`, `is_symlink respectively`. Deprecated `is_file` and `is_directory` removed.
+- Fix mapping of `FileInfo` attr names in JS
+- Add underlying `String` as context to `Unknown` error
 - improve performance of `get_files`
 
 ## v1.7.0 - 5 April 2024

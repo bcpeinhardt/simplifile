@@ -7,9 +7,9 @@ import simplifile.{
   Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
   append_bits, copy_directory, copy_file, create_directory, create_directory_all,
   create_file, create_symlink, delete, delete_all, file_info,
-  file_permissions_to_octal, get_files, read, read_bits, read_directory,
-  rename_directory, rename_file, set_permissions, set_permissions_octal,
-  verify_is_directory, verify_is_file, verify_is_symlink, write, write_bits,
+  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink, read,
+  read_bits, read_directory, rename_directory, rename_file, set_permissions,
+  set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -60,7 +60,7 @@ pub fn path_test() {
     "Hello"
     |> write(to: filepath)
 
-  let assert Ok(False) = verify_is_directory(filepath)
+  let assert Ok(False) = is_directory(filepath)
 
   let assert Ok(_) = delete(file_or_dir_at: "./tmp/path_test.txt")
 }
@@ -96,7 +96,7 @@ pub fn read_directory_test() {
   // Test setup
   let test_dir = "./tmp/test_dir"
   let assert Ok(_) = create_directory(test_dir)
-  let assert Ok(True) = verify_is_directory(test_dir)
+  let assert Ok(True) = is_directory(test_dir)
   let assert Ok(_) =
     "some txt"
     |> write(to: test_dir <> "/test.txt")
@@ -131,24 +131,24 @@ pub fn non_utf_test() {
 pub fn is_file_test() {
   // Basic usage
   let filepath = "./tmp/is_file_test.txt"
-  let assert Ok(False) = verify_is_file(filepath)
+  let assert Ok(False) = is_file(filepath)
   let assert Ok(_) =
     ""
     |> write(to: filepath)
-  let assert Ok(True) = verify_is_file(filepath)
+  let assert Ok(True) = is_file(filepath)
   let assert Ok(_) = delete(file_or_dir_at: filepath)
-  let assert Ok(False) = verify_is_file(filepath)
+  let assert Ok(False) = is_file(filepath)
 
   // A directory is not a file
-  let assert Ok(False) = verify_is_file("./tmp")
+  let assert Ok(False) = is_file("./tmp")
 }
 
 pub fn is_directory_test() {
-  let assert Ok(True) = verify_is_directory("./tmp")
-  let assert Ok(False) = verify_is_directory("./does_not_exist")
+  let assert Ok(True) = is_directory("./tmp")
+  let assert Ok(False) = is_directory("./does_not_exist")
 
   // A file is not a directory
-  let assert Ok(False) = verify_is_directory("./simplifile.gleam")
+  let assert Ok(False) = is_directory("./simplifile.gleam")
 }
 
 pub fn is_symlink_test() {
@@ -163,33 +163,33 @@ pub fn is_symlink_test() {
     ""
     |> write(to: filepath)
   let assert Ok(_) = create_symlink(the_target, the_symlink)
-  let assert Ok(True) = verify_is_symlink(the_symlink)
-  let assert Ok(False) = verify_is_symlink("./does_not_exist")
+  let assert Ok(True) = is_symlink(the_symlink)
+  let assert Ok(False) = is_symlink("./does_not_exist")
   // A symlink is not a file if the target doesn't exist
-  let assert Ok(False) = verify_is_file(the_symlink)
+  let assert Ok(False) = is_file(the_symlink)
   // A symlink is a file if the file target does exist
   let assert Ok(_) =
     ""
     |> write(to: "./tmp/" <> existing_file_target_for_symlink)
   let assert Ok(_) =
     create_symlink(existing_file_target_for_symlink, symlink_to_existing_file)
-  let assert Ok(True) = verify_is_symlink(symlink_to_existing_file)
-  let assert Ok(True) = verify_is_file(symlink_to_existing_file)
-  let assert Ok(False) = verify_is_directory(symlink_to_existing_file)
+  let assert Ok(True) = is_symlink(symlink_to_existing_file)
+  let assert Ok(True) = is_file(symlink_to_existing_file)
+  let assert Ok(False) = is_directory(symlink_to_existing_file)
   // A symlink is not a directory if the target doesn't exist
-  let assert Ok(False) = verify_is_directory(the_symlink)
+  let assert Ok(False) = is_directory(the_symlink)
   // A symlink is a directory if the directory target does exist
   let assert Ok(_) =
     create_directory("./tmp/" <> existing_dir_target_for_symlink)
   let assert Ok(_) =
     create_symlink(existing_dir_target_for_symlink, symlink_to_existing_dir)
-  let assert Ok(True) = verify_is_symlink(symlink_to_existing_dir)
-  let assert Ok(True) = verify_is_directory(symlink_to_existing_dir)
-  let assert Ok(False) = verify_is_file(symlink_to_existing_dir)
+  let assert Ok(True) = is_symlink(symlink_to_existing_dir)
+  let assert Ok(True) = is_directory(symlink_to_existing_dir)
+  let assert Ok(False) = is_file(symlink_to_existing_dir)
   // A file is not a symlink
-  let assert Ok(False) = verify_is_symlink(filepath)
+  let assert Ok(False) = is_symlink(filepath)
   // A directory is not a symlink
-  let assert Ok(False) = verify_is_symlink("./tmp/")
+  let assert Ok(False) = is_symlink("./tmp/")
   // Clean everything
   let assert Ok(_) = delete(file_or_dir_at: filepath)
   let assert Ok(_) = delete(symlink_to_existing_file)
@@ -201,8 +201,8 @@ pub fn is_symlink_test() {
 
 pub fn create_all_test() {
   let assert Ok(_) = create_directory_all("./tmp/level1/level2")
-  let assert Ok(True) = verify_is_directory("./tmp/level1")
-  let assert Ok(True) = verify_is_directory("./tmp/level1/level2")
+  let assert Ok(True) = is_directory("./tmp/level1")
+  let assert Ok(True) = is_directory("./tmp/level1/level2")
   let assert Ok(_) = delete("./tmp/level1")
 }
 
@@ -219,8 +219,8 @@ pub fn rename_test() {
   let assert Ok(_) = write("Hello", to: "./tmp/to_be_renamed.txt")
   let assert Ok(Nil) =
     rename_file("./tmp/to_be_renamed.txt", to: "./tmp/renamed.txt")
-  let assert Ok(False) = verify_is_file("./tmp/to_be_renamed.txt")
-  let assert Ok(True) = verify_is_file("./tmp/renamed.txt")
+  let assert Ok(False) = is_file("./tmp/to_be_renamed.txt")
+  let assert Ok(True) = is_file("./tmp/renamed.txt")
   let assert Ok(_) = delete("./tmp/renamed.txt")
 }
 
@@ -313,13 +313,13 @@ pub fn delete_test() {
     ""
     |> write(to: "./tmp/" <> the_target)
   let assert Ok(_) = create_symlink(the_target, the_symlink)
-  let assert Ok(True) = verify_is_file("./tmp/" <> the_target)
-  let assert Ok(True) = verify_is_symlink(the_symlink)
+  let assert Ok(True) = is_file("./tmp/" <> the_target)
+  let assert Ok(True) = is_symlink(the_symlink)
   let assert Ok(_) = delete(the_symlink)
-  let assert Ok(False) = verify_is_symlink(the_symlink)
-  let assert Ok(True) = verify_is_file("./tmp/" <> the_target)
+  let assert Ok(False) = is_symlink(the_symlink)
+  let assert Ok(True) = is_file("./tmp/" <> the_target)
   let assert Ok(_) = delete(file_or_dir_at: "./tmp/" <> the_target)
-  let assert Ok(False) = verify_is_file("./tmp/" <> the_target)
+  let assert Ok(False) = is_file("./tmp/" <> the_target)
 }
 
 pub fn delete_all_test() {
@@ -434,14 +434,14 @@ pub fn verify_is_file_and_is_dir_test() {
   let existing_dir = "./test"
   let non_existing_file = "./i_dont_exist"
 
-  let assert Ok(True) = verify_is_file(existing_file)
-  let assert Ok(True) = verify_is_directory(existing_dir)
+  let assert Ok(True) = is_file(existing_file)
+  let assert Ok(True) = is_directory(existing_dir)
 
-  let assert Ok(False) = verify_is_directory(existing_file)
-  let assert Ok(False) = verify_is_file(existing_dir)
+  let assert Ok(False) = is_directory(existing_file)
+  let assert Ok(False) = is_file(existing_dir)
 
-  let assert Ok(False) = verify_is_file(non_existing_file)
-  let assert Ok(False) = verify_is_directory(non_existing_file)
+  let assert Ok(False) = is_file(non_existing_file)
+  let assert Ok(False) = is_directory(non_existing_file)
 }
 
 pub fn no_read_permissions_test() {
@@ -456,8 +456,8 @@ pub fn no_read_permissions_test() {
   let assert Ok(Nil) = set_permissions_octal(parent_dir, 0o000)
 
   // Verify that we can't read the file or directory
-  let assert Error(Eacces) = verify_is_file(new_file)
-  let assert Error(Eacces) = verify_is_directory(new_dir)
+  let assert Error(Eacces) = is_file(new_file)
+  let assert Error(Eacces) = is_directory(new_dir)
 
   // Cleanup
   let assert Ok(Nil) = set_permissions_octal(parent_dir, 0o777)
@@ -477,7 +477,7 @@ pub fn clear_directory_test() {
   let assert Ok(_) = create_file("./tmp/clear_dir/nested_dir/test.txt")
 
   let assert Ok(_) = simplifile.clear_directory("./tmp/clear_dir")
-  verify_is_directory("./tmp/clear_dir")
+  is_directory("./tmp/clear_dir")
   |> should.equal(Ok(True))
   let assert Ok([]) = read_directory("./tmp/clear_dir")
   let assert Ok(_) = delete("./tmp/clear_dir")

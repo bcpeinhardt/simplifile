@@ -20,6 +20,13 @@ You *should* use simplifile if
 If you think you need a different solutions, these projects may be helpful:
 [File streams (erlang target)](https://github.com/richard-viney/file_streams)
 
+## Upgrading to 2.0
+
+Please consult the changelog, but basically:
+The deprecated `is_file`, `is_directory` functions have been removed.
+The `verify_is_file`, `verify_is_directory`, and `verify_is_symlink` have had their verify_ prefixes removed (now `is_file`, `is_directory`, `is_symlink` respectively).
+The `Unknown` variant of `FileError` now has an inner `String`. 
+
 ## Example
 ```gleam
 let filepath = "./test/hello.txt"

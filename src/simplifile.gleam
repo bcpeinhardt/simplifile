@@ -333,25 +333,14 @@ pub fn append_bits(
   |> cast_error
 }
 
-/// Checks if the provided filepath is a directory
-/// ## Example
-/// ```gleam
-/// let assert True = is_directory("./test")
-/// ```
-///
-@deprecated("Use `verify_is_directory` instead")
-pub fn is_directory(filepath: String) -> Bool {
-  do_is_directory(filepath)
-}
-
 /// Checks if the provided filepath exists and is a directory.
 /// Returns an error if it lacks permissions to read the directory.
 ///
 /// ## Example
 /// ```gleam
-/// let assert Ok(True) = verify_is_directory("./test")
+/// let assert Ok(True) = is_directory("./test")
 /// ```
-pub fn verify_is_directory(filepath: String) -> Result(Bool, FileError) {
+pub fn is_directory(filepath: String) -> Result(Bool, FileError) {
   do_verify_is_directory(filepath)
   |> cast_error
 }
@@ -403,22 +392,15 @@ pub fn read_directory(at path: String) -> Result(List(String), FileError) {
   |> cast_error
 }
 
-/// Returns `True` if there is a file at the given path, false otherwise.
-///
-@deprecated("Use `verify_is_file` instead")
-pub fn is_file(filepath: String) -> Bool {
-  do_is_file(filepath)
-}
-
 /// Checks if the file at the provided filepath exists and is a file.
 /// Returns an Error if it lacks permissions to read the file.
 ///
 /// ## Example
 /// ```gleam
-/// let assert Ok(True) = verify_is_file("./test.txt")
+/// let assert Ok(True) = is_file("./test.txt")
 /// ```
 ///
-pub fn verify_is_file(filepath: String) -> Result(Bool, FileError) {
+pub fn is_file(filepath: String) -> Result(Bool, FileError) {
   do_verify_is_file(filepath)
   |> cast_error
 }
@@ -436,10 +418,10 @@ fn do_verify_is_file(filepath: String) -> Result(Bool, FileError)
 ///
 /// ## Example
 /// ```gleam
-/// let assert Ok(True) = verify_is_symlink("./symlink")
+/// let assert Ok(True) = is_symlink("./symlink")
 /// ```
 ///
-pub fn verify_is_symlink(filepath: String) -> Result(Bool, FileError) {
+pub fn is_symlink(filepath: String) -> Result(Bool, FileError) {
   do_verify_is_symlink(filepath)
   |> cast_error
 }
@@ -458,9 +440,9 @@ fn do_verify_is_symlink(filepath: String) -> Result(Bool, FileError)
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
   case
     filepath
-    |> verify_is_file,
+    |> is_file,
     filepath
-    |> verify_is_directory
+    |> is_directory
   {
     Ok(True), _ | _, Ok(True) -> Error(Eexist)
     _, _ -> write_bits(<<>>, to: filepath)
@@ -517,7 +499,7 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
     let src_path = filepath.join(src, segment)
     let dest_path = filepath.join(dest, segment)
 
-    case verify_is_file(src_path), verify_is_directory(src_path) {
+    case is_file(src_path), is_directory(src_path) {
       Ok(True), Ok(False) -> {
         // For a file, create the file in the new directory
         use content <- result.try(read_bits(src_path))
@@ -567,11 +549,11 @@ pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use acc, content <- list.try_fold(over: contents, from: [])
   let path = filepath.join(directory, content)
 
-  case verify_is_file(path) {
+  case is_file(path) {
     Error(e) -> Error(e)
     Ok(True) -> Ok([path, ..acc])
     Ok(False) ->
-      case verify_is_directory(path) {
+      case is_directory(path) {
         Error(e) -> Error(e)
         Ok(False) -> Ok(acc)
         Ok(True) -> {
@@ -729,10 +711,6 @@ fn do_write_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
 fn do_append_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
 
 @target(javascript)
-@external(javascript, "./simplifile_js.mjs", "isDirectory")
-fn do_is_directory(filepath: String) -> Bool
-
-@target(javascript)
 @external(javascript, "./simplifile_js.mjs", "makeDirectory")
 fn do_make_directory(filepath: String) -> Result(Nil, String)
 
@@ -868,10 +846,6 @@ fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
 }
 
 @target(erlang)
-@external(erlang, "filelib", "is_dir")
-fn do_is_directory(path: String) -> Bool
-
-@target(erlang)
 @external(erlang, "simplifile_erl", "make_directory")
 fn do_make_directory(directory: String) -> Result(Nil, FileError)
 
@@ -882,10 +856,6 @@ fn do_make_symlink(target: String, symlink: String) -> Result(Nil, FileError)
 @target(erlang)
 @external(erlang, "simplifile_erl", "list_directory")
 fn do_read_directory(directory: String) -> Result(List(String), FileError)
-
-@external(erlang, "simplifile_erl", "is_file")
-@external(javascript, "./simplifile_js.mjs", "isFile")
-fn do_is_file(filepath: String) -> Bool
 
 @target(erlang)
 @external(erlang, "simplifile_erl", "create_dir_all")

@@ -8,8 +8,7 @@
 
 %% API
 -export([read_file/1, append_file/2, write_file/2, delete_file/1, delete_directory/1,
-         recursive_delete/1, list_directory/1, make_directory/1, make_symlink/2,
-         is_file/1, create_dir_all/1, rename_file/2, set_permissions/2,
+         recursive_delete/1, list_directory/1, make_directory/1, make_symlink/2, create_dir_all/1, rename_file/2, set_permissions/2,
          is_valid_directory/1, is_valid_file/1, is_valid_symlink/1, file_info/1]).
 
 -include_lib("kernel/include/file.hrl").
@@ -117,10 +116,6 @@ delete_directory(Dir) ->
 recursive_delete(Dir) ->
     posix_result(file:del_dir_r(Dir)).
 
-%% Checks whether a given file exists and is a file (as opposed to a directory)
-is_file(Filename) ->
-    not (file:read_file_info(Filename) == {error, enoent}) and not filelib:is_dir(Filename).
-
 %% Creates the entire path for a given directory to exist
 create_dir_all(Filename) ->
     posix_result(filelib:ensure_dir(Filename)).
@@ -213,4 +208,3 @@ file_info_result(Result) ->
 
 file_info(Filename) ->
     file_info_result(file:read_file_info(Filename, [{time, posix}])).
-

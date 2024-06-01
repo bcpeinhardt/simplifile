@@ -4,7 +4,6 @@ import fs from "node:fs"
 import path from "node:path"
 import process from "node:process"
 import { BitArray, Ok, Error as GError, toList} from "./gleam.mjs";
-import { verify_is_directory } from "./simplifile.mjs";
 
 /**
  * Read the contents of a file as a BitArray 
@@ -44,18 +43,6 @@ export function appendBits(contents, filepath) {
 /**
  * Check whether a file exists at the given path
  * 
- * @deprecated Use `isValidFile` instead
- * @param {string} filepath 
- * @returns {boolean} 
- */
-export function isFile(filepath) {
-    let fp = path.normalize(filepath)
-    return fs.existsSync(fp) && fs.statSync(fp).isFile();
-}
-
-/**
- * Check whether a file exists at the given path
- * 
  * @param {string} filepath 
  * @returns {Ok | GError} 
  */
@@ -87,18 +74,6 @@ export function isValidSymlink(filepath) {
             return new GError(e.code);
         }
     }
-}
-
-/**
- * Check whether a directory exists at the given path
- * 
- * @deprecated Use `isValidDirectory` instead
- * @param {string} filepath 
- * @returns {boolean}
- */
-export function isDirectory(filepath) {
-    let fp = path.normalize(filepath)
-    return fs.existsSync(fp) && fs.statSync(fp).isDirectory();
 }
 
 /**
