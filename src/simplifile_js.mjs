@@ -237,12 +237,12 @@ class FileInfo {
         this.mode = stat.mode
         this.nlinks = stat.nlink
         this.inode = stat.ino
-        this.userId = stat.uid
-        this.groupId = stat.gid
+        this.user_id = stat.uid
+        this.group_id = stat.gid
         this.dev = stat.dev
-        this.atime = Math.floor(stat.atimeMs / 1000)
-        this.mtime = Math.floor(stat.mtimeMs / 1000)
-        this.ctime = Math.floor(stat.ctimeMs / 1000)
+        this.atime_seconds = Math.floor(stat.atimeMs / 1000)
+        this.mtime_seconds = Math.floor(stat.mtimeMs / 1000)
+        this.ctime_seconds = Math.floor(stat.ctimeMs / 1000)
     }
 }
 
