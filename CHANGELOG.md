@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## v2.0.0 - 1 June 2024
+- Fix mapping of fileinfo attr name in JS
 - Add underlying string as context to `Unknown` error
 - improve performance of `get_files`
 

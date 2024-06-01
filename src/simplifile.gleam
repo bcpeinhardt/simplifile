@@ -529,12 +529,10 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
         use _ <- result.try(create_directory(dest_path))
         do_copy_directory(src_path, dest_path)
       }
-      Error(e), _
-      | _, Error(e) -> {
+      Error(e), _ | _, Error(e) -> {
         Error(e)
       }
-      Ok(False), Ok(False)
-      | Ok(True), Ok(True) -> {
+      Ok(False), Ok(False) | Ok(True), Ok(True) -> {
         // We're really not sure how that one happened.
         Error(Unknown("Unknown error copying directory"))
       }
