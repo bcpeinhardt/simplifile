@@ -47,7 +47,7 @@ export function appendBits(filepath, contents) {
  * @param {string} filepath
  * @returns {Ok | GError}
  */
-export function isValidFile(filepath) {
+export function isFile(filepath) {
   try {
     return new Ok(fs.statSync(path.normalize(filepath)).isFile());
   } catch (e) {
@@ -65,7 +65,7 @@ export function isValidFile(filepath) {
  * @param {string} filepath
  * @returns {Ok | GError}
  */
-export function isValidSymlink(filepath) {
+export function isSymlink(filepath) {
   try {
     return new Ok(fs.lstatSync(path.normalize(filepath)).isSymbolicLink());
   } catch (e) {
@@ -83,7 +83,7 @@ export function isValidSymlink(filepath) {
  * @param {string} filepath
  * @returns {Ok | GError}
  */
-export function isValidDirectory(filepath) {
+export function isDirectory(filepath) {
   try {
     return new Ok(fs.statSync(path.normalize(filepath)).isDirectory());
   } catch (e) {
@@ -102,7 +102,7 @@ export function isValidDirectory(filepath) {
  * @param {string} path
  * @returns {Ok | GError}
  */
-export function makeSymlink(target, path) {
+export function createSymlink(target, path) {
   return gleamResult(() => fs.symlinkSync(target, path));
 }
 
@@ -112,7 +112,7 @@ export function makeSymlink(target, path) {
  * @param {string} filepath
  * @returns {Ok | GError}
  */
-export function makeDirectory(filepath) {
+export function createDirectory(filepath) {
   return gleamResult(() => fs.mkdirSync(path.normalize(filepath)));
 }
 
@@ -134,9 +134,9 @@ export function createDirAll(filepath) {
  * @param {string} fileOrDirPath
  * @returns {Ok | GError}
  */
-export function deleteFileOrDirRecursive(fileOrDirPath) {
+export function delete_(fileOrDirPath) {
   return gleamResult(() => {
-    const isDir = isValidDirectory(fileOrDirPath);
+    const isDir = isDirectory(fileOrDirPath);
     if (isDir instanceof Ok && isDir[0] === true) {
       fs.rmSync(path.normalize(fileOrDirPath), { recursive: true });
     } else {
@@ -151,7 +151,7 @@ export function deleteFileOrDirRecursive(fileOrDirPath) {
  * @param {string} filepath
  * @returns {Ok | GError}
  */
-export function listContents(filepath) {
+export function readDirectory(filepath) {
   return gleamResult(() => toList(fs.readdirSync(path.normalize(filepath))));
 }
 
@@ -184,7 +184,7 @@ export function renameFile(srcpath, destpath) {
  * @param {number} octalNumber
  * @returns {Ok | GError}
  */
-export function setPermissions(filepath, octalNumber) {
+export function setPermissionsOctal(filepath, octalNumber) {
   return gleamResult(() => fs.chmodSync(path.normalize(filepath), octalNumber));
 }
 

@@ -255,8 +255,8 @@ pub fn write(
 /// ```gleam
 /// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
 /// ```
-@external(erlang, "simplifile_erl", "recursive_delete")
-@external(javascript, "./simplifile_js.mjs", "deleteFileOrDirRecursive")
+@external(erlang, "simplifile_erl", "delete")
+@external(javascript, "./simplifile_js.mjs", "delete_")
 pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError)
 
 /// Delete all files/directories specified in a list of paths.
@@ -296,7 +296,7 @@ pub fn append(
 /// ```gleam
 /// let assert Ok(records) = read_bits(from: "./users.csv")
 /// ```
-@external(erlang, "simplifile_erl", "read_file")
+@external(erlang, "simplifile_erl", "read_bits")
 @external(javascript, "./simplifile_js.mjs", "readBits")
 pub fn read_bits(from filepath: String) -> Result(BitArray, FileError)
 
@@ -306,7 +306,7 @@ pub fn read_bits(from filepath: String) -> Result(BitArray, FileError)
 /// let assert Ok(Nil) = write_bits(to: "./hello_world.txt", bits: <<"Hello, World!":utf8>>)
 /// ```
 ///
-@external(erlang, "simplifile_erl", "write_file")
+@external(erlang, "simplifile_erl", "write_bits")
 @external(javascript, "./simplifile_js.mjs", "writeBits")
 pub fn write_bits(
   to filepath: String,
@@ -319,7 +319,7 @@ pub fn write_bits(
 /// let assert Ok(Nil) = append_bits(to: "./needs_more_text.txt", bits: <<"more text":utf8>>)
 /// ```
 ///
-@external(erlang, "simplifile_erl", "append_file")
+@external(erlang, "simplifile_erl", "append_bits")
 @external(javascript, "./simplifile_js.mjs", "appendBits")
 pub fn append_bits(
   to filepath: String,
@@ -333,8 +333,8 @@ pub fn append_bits(
 /// ```gleam
 /// let assert Ok(True) = is_directory("./test")
 /// ```
-@external(erlang, "simplifile_erl", "is_valid_directory")
-@external(javascript, "./simplifile_js.mjs", "isValidDirectory")
+@external(erlang, "simplifile_erl", "is_directory")
+@external(javascript, "./simplifile_js.mjs", "isDirectory")
 pub fn is_directory(filepath: String) -> Result(Bool, FileError)
 
 /// Create a directory at the provided filepath. Returns an error if
@@ -344,8 +344,8 @@ pub fn is_directory(filepath: String) -> Result(Bool, FileError)
 /// ```gleam
 /// create_directory("./test")
 /// ```
-@external(erlang, "simplifile_erl", "make_directory")
-@external(javascript, "./simplifile_js.mjs", "makeDirectory")
+@external(erlang, "simplifile_erl", "create_directory")
+@external(javascript, "./simplifile_js.mjs", "createDirectory")
 pub fn create_directory(filepath: String) -> Result(Nil, FileError)
 
 /// Create a symbolic link called symlink pointing to target.
@@ -354,8 +354,8 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError)
 /// ```gleam
 /// create_symlink("../target", "./symlink")
 /// ```
-@external(erlang, "simplifile_erl", "make_symlink")
-@external(javascript, "./simplifile_js.mjs", "makeSymlink")
+@external(erlang, "simplifile_erl", "create_symlink")
+@external(javascript, "./simplifile_js.mjs", "createSymlink")
 pub fn create_symlink(
   to target: String,
   from symlink: String,
@@ -369,8 +369,8 @@ pub fn create_symlink(
 /// let assert Ok(files_and_folders) = read_directory(at: "./Folder1")
 /// ```
 ///
-@external(erlang, "simplifile_erl", "list_directory")
-@external(javascript, "./simplifile_js.mjs", "listContents")
+@external(erlang, "simplifile_erl", "read_directory")
+@external(javascript, "./simplifile_js.mjs", "readDirectory")
 pub fn read_directory(at path: String) -> Result(List(String), FileError)
 
 /// Checks if the file at the provided filepath exists and is a file.
@@ -381,8 +381,8 @@ pub fn read_directory(at path: String) -> Result(List(String), FileError)
 /// let assert Ok(True) = is_file("./test.txt")
 /// ```
 ///
-@external(erlang, "simplifile_erl", "is_valid_file")
-@external(javascript, "./simplifile_js.mjs", "isValidFile")
+@external(erlang, "simplifile_erl", "is_file")
+@external(javascript, "./simplifile_js.mjs", "isFile")
 pub fn is_file(filepath: String) -> Result(Bool, FileError)
 
 /// Checks if the file at the provided filepath exists and is a symbolic link.
@@ -393,8 +393,8 @@ pub fn is_file(filepath: String) -> Result(Bool, FileError)
 /// let assert Ok(True) = is_symlink("./symlink")
 /// ```
 ///
-@external(erlang, "simplifile_erl", "is_valid_symlink")
-@external(javascript, "./simplifile_js.mjs", "isValidSymlink")
+@external(erlang, "simplifile_erl", "is_symlink")
+@external(javascript, "./simplifile_js.mjs", "isSymlink")
 pub fn is_symlink(filepath: String) -> Result(Bool, FileError)
 
 /// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
@@ -587,8 +587,8 @@ pub fn set_permissions(
 /// ```gleam
 /// set_permissions_octal("./script.sh", 0o777)
 /// ```
-@external(erlang, "simplifile_erl", "set_permissions")
-@external(javascript, "./simplifile_js.mjs", "setPermissions")
+@external(erlang, "simplifile_erl", "set_permissions_octal")
+@external(javascript, "./simplifile_js.mjs", "setPermissionsOctal")
 pub fn set_permissions_octal(
   for_file_at filepath: String,
   to permissions: Int,
