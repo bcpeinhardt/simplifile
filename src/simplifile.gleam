@@ -4,7 +4,6 @@ import gleam/int
 import gleam/list
 import gleam/result
 import gleam/set.{type Set}
-@target(erlang)
 import gleam/string
 
 /// This type represents all of the reasons for why a file system operation could fail.
@@ -211,19 +210,10 @@ pub type FileInfo {
   )
 }
 
-@target(erlang)
-@external(erlang, "simplifile_erl", "file_info")
-fn do_file_info(a: String) -> Result(FileInfo, FileError)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "fileInfo")
-fn do_file_info(a: String) -> Result(FileInfo, String)
-
 /// Get information about a file at a given path
-pub fn file_info(a: String) -> Result(FileInfo, FileError) {
-  do_file_info(a)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "file_info")
+@external(javascript, "./simplifile_js.mjs", "fileInfo")
+pub fn file_info(filepath: String) -> Result(FileInfo, FileError)
 
 /// Read a files contents as a string
 /// ## Example
@@ -232,8 +222,15 @@ pub fn file_info(a: String) -> Result(FileInfo, FileError) {
 /// ```
 ///
 pub fn read(from filepath: String) -> Result(String, FileError) {
-  do_read(filepath)
-  |> cast_error
+  case read_bits(filepath) {
+    Ok(bits) -> {
+      case bit_array.to_string(bits) {
+        Ok(str) -> Ok(str)
+        _ -> Error(NotUtf8)
+      }
+    }
+    Error(e) -> Error(e)
+  }
 }
 
 /// Write a string to a file at the given path
@@ -246,8 +243,9 @@ pub fn write(
   to filepath: String,
   contents contents: String,
 ) -> Result(Nil, FileError) {
-  do_write(contents, to: filepath)
-  |> cast_error
+  contents
+  |> bit_array.from_string
+  |> write_bits(to: filepath)
 }
 
 /// Delete a file or directory at a given path. Performs a recursive
@@ -257,11 +255,9 @@ pub fn write(
 /// ```gleam
 /// let assert Ok(Nil) = delete(file_at: "./delete_me.txt")
 /// ```
-///
-pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError) {
-  do_delete(path)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "delete")
+@external(javascript, "./simplifile_js.mjs", "delete_")
+pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError)
 
 /// Delete all files/directories specified in a list of paths.
 /// Recursively deletes provided directories.
@@ -290,8 +286,9 @@ pub fn append(
   to filepath: String,
   contents contents: String,
 ) -> Result(Nil, FileError) {
-  do_append(contents, to: filepath)
-  |> cast_error
+  contents
+  |> bit_array.from_string
+  |> append_bits(to: filepath)
 }
 
 /// Read a files contents as a bitstring
@@ -299,11 +296,9 @@ pub fn append(
 /// ```gleam
 /// let assert Ok(records) = read_bits(from: "./users.csv")
 /// ```
-///
-pub fn read_bits(from filepath: String) -> Result(BitArray, FileError) {
-  do_read_bits(filepath)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "read_bits")
+@external(javascript, "./simplifile_js.mjs", "readBits")
+pub fn read_bits(from filepath: String) -> Result(BitArray, FileError)
 
 /// Write a bitstring to a file at the given path
 /// ## Example
@@ -311,13 +306,12 @@ pub fn read_bits(from filepath: String) -> Result(BitArray, FileError) {
 /// let assert Ok(Nil) = write_bits(to: "./hello_world.txt", bits: <<"Hello, World!":utf8>>)
 /// ```
 ///
+@external(erlang, "simplifile_erl", "write_bits")
+@external(javascript, "./simplifile_js.mjs", "writeBits")
 pub fn write_bits(
   to filepath: String,
   bits bits: BitArray,
-) -> Result(Nil, FileError) {
-  do_write_bits(bits, filepath)
-  |> cast_error
-}
+) -> Result(Nil, FileError)
 
 /// Append a bitstring to the contents of a file at the given path
 /// ## Example
@@ -325,13 +319,12 @@ pub fn write_bits(
 /// let assert Ok(Nil) = append_bits(to: "./needs_more_text.txt", bits: <<"more text":utf8>>)
 /// ```
 ///
+@external(erlang, "simplifile_erl", "append_bits")
+@external(javascript, "./simplifile_js.mjs", "appendBits")
 pub fn append_bits(
   to filepath: String,
   bits bits: BitArray,
-) -> Result(Nil, FileError) {
-  do_append_bits(bits, filepath)
-  |> cast_error
-}
+) -> Result(Nil, FileError)
 
 /// Checks if the provided filepath exists and is a directory.
 /// Returns an error if it lacks permissions to read the directory.
@@ -340,18 +333,9 @@ pub fn append_bits(
 /// ```gleam
 /// let assert Ok(True) = is_directory("./test")
 /// ```
-pub fn is_directory(filepath: String) -> Result(Bool, FileError) {
-  do_verify_is_directory(filepath)
-  |> cast_error
-}
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "isValidDirectory")
-fn do_verify_is_directory(filepath: String) -> Result(Bool, String)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "is_valid_directory")
-fn do_verify_is_directory(filepath: String) -> Result(Bool, FileError)
+@external(erlang, "simplifile_erl", "is_directory")
+@external(javascript, "./simplifile_js.mjs", "isDirectory")
+pub fn is_directory(filepath: String) -> Result(Bool, FileError)
 
 /// Create a directory at the provided filepath. Returns an error if
 /// the directory already exists.
@@ -360,10 +344,9 @@ fn do_verify_is_directory(filepath: String) -> Result(Bool, FileError)
 /// ```gleam
 /// create_directory("./test")
 /// ```
-pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
-  do_make_directory(filepath)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "create_directory")
+@external(javascript, "./simplifile_js.mjs", "createDirectory")
+pub fn create_directory(filepath: String) -> Result(Nil, FileError)
 
 /// Create a symbolic link called symlink pointing to target.
 ///
@@ -371,13 +354,12 @@ pub fn create_directory(filepath: String) -> Result(Nil, FileError) {
 /// ```gleam
 /// create_symlink("../target", "./symlink")
 /// ```
+@external(erlang, "simplifile_erl", "create_symlink")
+@external(javascript, "./simplifile_js.mjs", "createSymlink")
 pub fn create_symlink(
   to target: String,
   from symlink: String,
-) -> Result(Nil, FileError) {
-  do_make_symlink(target, symlink)
-  |> cast_error
-}
+) -> Result(Nil, FileError)
 
 /// Lists the contents of a directory.
 /// The list contains directory and file names, and is not recursive.
@@ -387,10 +369,9 @@ pub fn create_symlink(
 /// let assert Ok(files_and_folders) = read_directory(at: "./Folder1")
 /// ```
 ///
-pub fn read_directory(at path: String) -> Result(List(String), FileError) {
-  do_read_directory(path)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "read_directory")
+@external(javascript, "./simplifile_js.mjs", "readDirectory")
+pub fn read_directory(at path: String) -> Result(List(String), FileError)
 
 /// Checks if the file at the provided filepath exists and is a file.
 /// Returns an Error if it lacks permissions to read the file.
@@ -400,18 +381,9 @@ pub fn read_directory(at path: String) -> Result(List(String), FileError) {
 /// let assert Ok(True) = is_file("./test.txt")
 /// ```
 ///
-pub fn is_file(filepath: String) -> Result(Bool, FileError) {
-  do_verify_is_file(filepath)
-  |> cast_error
-}
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "isValidFile")
-fn do_verify_is_file(filepath: String) -> Result(Bool, String)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "is_valid_file")
-fn do_verify_is_file(filepath: String) -> Result(Bool, FileError)
+@external(erlang, "simplifile_erl", "is_file")
+@external(javascript, "./simplifile_js.mjs", "isFile")
+pub fn is_file(filepath: String) -> Result(Bool, FileError)
 
 /// Checks if the file at the provided filepath exists and is a symbolic link.
 /// Returns an Error if it lacks permissions to read the file.
@@ -421,29 +393,15 @@ fn do_verify_is_file(filepath: String) -> Result(Bool, FileError)
 /// let assert Ok(True) = is_symlink("./symlink")
 /// ```
 ///
-pub fn is_symlink(filepath: String) -> Result(Bool, FileError) {
-  do_verify_is_symlink(filepath)
-  |> cast_error
-}
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "isValidSymlink")
-fn do_verify_is_symlink(filepath: String) -> Result(Bool, String)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "is_valid_symlink")
-fn do_verify_is_symlink(filepath: String) -> Result(Bool, FileError)
+@external(erlang, "simplifile_erl", "is_symlink")
+@external(javascript, "./simplifile_js.mjs", "isSymlink")
+pub fn is_symlink(filepath: String) -> Result(Bool, FileError)
 
 /// Creates an empty file at the given filepath. Returns an `Error(Eexist)`
 /// if the file already exists.
 ///
 pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
-  case
-    filepath
-    |> is_file,
-    filepath
-    |> is_directory
-  {
+  case filepath |> is_file, filepath |> is_directory {
     Ok(True), _ | _, Ok(True) -> Error(Eexist)
     _, _ -> write_bits(<<>>, to: filepath)
   }
@@ -464,23 +422,28 @@ pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
     False -> path
   }
   do_create_dir_all(path <> "/")
-  |> cast_error
 }
+
+@external(erlang, "simplifile_erl", "create_dir_all")
+@external(javascript, "./simplifile_js.mjs", "createDirAll")
+fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)
 
 /// Copy a file at a given path to another path.
 /// Note: destination should include the filename, not just the directory
 pub fn copy_file(at src: String, to dest: String) -> Result(Nil, FileError) {
   do_copy_file(src, dest)
   |> result.replace(Nil)
-  |> cast_error
 }
+
+@external(erlang, "file", "copy")
+@external(javascript, "./simplifile_js.mjs", "copyFile")
+fn do_copy_file(src: String, dest: String) -> Result(Int, FileError)
 
 /// Rename a file at a given path to another path.
 /// Note: destination should include the filename, not just the directory
-pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError) {
-  do_rename_file(src, dest)
-  |> cast_error
-}
+@external(erlang, "simplifile_erl", "rename_file")
+@external(javascript, "./simplifile_js.mjs", "renameFile")
+pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError)
 
 /// Copy a directory recursively
 pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError) {
@@ -624,247 +587,20 @@ pub fn set_permissions(
 /// ```gleam
 /// set_permissions_octal("./script.sh", 0o777)
 /// ```
+@external(erlang, "simplifile_erl", "set_permissions_octal")
+@external(javascript, "./simplifile_js.mjs", "setPermissionsOctal")
 pub fn set_permissions_octal(
   for_file_at filepath: String,
   to permissions: Int,
-) -> Result(Nil, FileError) {
-  do_set_permissions(filepath, permissions)
-  |> cast_error
-}
+) -> Result(Nil, FileError)
 
 /// Returns the current working directory
 ///
-pub fn current_directory() -> Result(String, FileError) {
-  do_current_directory()
-  |> cast_error
-}
-
-@target(javascript)
 @external(javascript, "./simplifile_js.mjs", "currentDirectory")
-fn do_current_directory() -> Result(String, String)
-
-@target(erlang)
-fn do_current_directory() -> Result(String, FileError) {
-  do_do_current_directory()
+pub fn current_directory() -> Result(String, FileError) {
+  erl_do_current_directory()
   |> result.map(string.from_utf_codepoints)
 }
 
-@target(erlang)
 @external(erlang, "file", "get_cwd")
-fn do_do_current_directory() -> Result(List(UtfCodepoint), FileError)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "setPermissions")
-fn do_set_permissions(
-  file_at: String,
-  permissions_octal: Int,
-) -> Result(Nil, String)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "set_permissions")
-fn do_set_permissions(
-  file_at: String,
-  permissions_octal: Int,
-) -> Result(Nil, FileError)
-
-@target(javascript)
-fn do_read(from filepath: String) -> Result(String, String) {
-  case do_read_bits(filepath) {
-    Ok(bits) -> {
-      case bit_array.to_string(bits) {
-        Ok(str) -> Ok(str)
-        _ -> Error("NOTUTF8")
-      }
-    }
-    Error(e) -> Error(e)
-  }
-}
-
-@target(javascript)
-fn do_write(content: String, to filepath: String) -> Result(Nil, String) {
-  content
-  |> bit_array.from_string
-  |> do_write_bits(to: filepath)
-}
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "deleteFileOrDirRecursive")
-fn do_delete(file_or_dir_at: String) -> Result(Nil, String)
-
-@target(javascript)
-fn do_append(content: String, to filepath: String) -> Result(Nil, String) {
-  content
-  |> bit_array.from_string
-  |> do_append_bits(to: filepath)
-}
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "readBits")
-fn do_read_bits(from: String) -> Result(BitArray, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "writeBits")
-fn do_write_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "appendBits")
-fn do_append_bits(content: BitArray, to filepath: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "makeDirectory")
-fn do_make_directory(filepath: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "makeSymlink")
-fn do_make_symlink(target: String, symlink: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "createDirAll")
-fn do_create_dir_all(dirpath: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "listContents")
-fn do_read_directory(directory_path: String) -> Result(List(String), String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "copyFile")
-fn do_copy_file(at: String, to: String) -> Result(Nil, String)
-
-@target(javascript)
-@external(javascript, "./simplifile_js.mjs", "renameFile")
-fn do_rename_file(at: String, to: String) -> Result(Nil, String)
-
-@target(javascript)
-fn cast_error(input: Result(a, String)) -> Result(a, FileError) {
-  result.map_error(input, fn(e) {
-    case e {
-      "EACCES" -> Eacces
-      "EAGAIN" -> Eagain
-      "EBADF" -> Ebadf
-      "EBADMSG" -> Ebadmsg
-      "EBUSY" -> Ebusy
-      "EDEADLK" -> Edeadlk
-      "EDEADLOCK" -> Edeadlock
-      "EDQUOT" -> Edquot
-      "EEXIST" -> Eexist
-      "EFAULT" -> Efault
-      "EFBIG" -> Efbig
-      "EFTYPE" -> Eftype
-      "EINTR" -> Eintr
-      "EINVAL" -> Einval
-      "EIO" -> Eio
-      "EISDIR" -> Eisdir
-      "ELOOP" -> Eloop
-      "EMFILE" -> Emfile
-      "EMLINK" -> Emlink
-      "EMULTIHOP" -> Emultihop
-      "ENAMETOOLONG" -> Enametoolong
-      "ENFILE" -> Enfile
-      "ENOBUFS" -> Enobufs
-      "ENODEV" -> Enodev
-      "ENOLCK" -> Enolck
-      "ENOLINK" -> Enolink
-      "ENOENT" -> Enoent
-      "ENOMEM" -> Enomem
-      "ENOSPC" -> Enospc
-      "ENOSR" -> Enosr
-      "ENOSTR" -> Enostr
-      "ENOSYS" -> Enosys
-      "ENOBLK" -> Enotblk
-      "ENODIR" -> Enotdir
-      "ENOTSUP" -> Enotsup
-      "ENXIO" -> Enxio
-      "EOPNOTSUPP" -> Eopnotsupp
-      "EOVERFLOW" -> Eoverflow
-      "EPERM" -> Eperm
-      "EPIPE" -> Epipe
-      "ERANGE" -> Erange
-      "EROFS" -> Erofs
-      "ESPIPE" -> Espipe
-      "ESRCH" -> Esrch
-      "ESTALE" -> Estale
-      "ETXTBSY" -> Etxtbsy
-      "EXDEV" -> Exdev
-      "NOTUTF8" -> NotUtf8
-      str -> Unknown(str)
-    }
-  })
-}
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "append_file")
-fn do_append_bits(
-  content: BitArray,
-  to filepath: String,
-) -> Result(Nil, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "write_file")
-fn do_write_bits(
-  content: BitArray,
-  to filepath: String,
-) -> Result(Nil, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "read_file")
-fn do_read_bits(from: String) -> Result(BitArray, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "recursive_delete")
-fn do_delete(file_or_dir_at: String) -> Result(Nil, FileError)
-
-@target(erlang)
-fn do_append(content: String, to filepath: String) -> Result(Nil, FileError) {
-  content
-  |> bit_array.from_string
-  |> do_append_bits(filepath)
-}
-
-@target(erlang)
-fn do_write(content: String, to filepath: String) -> Result(Nil, FileError) {
-  content
-  |> bit_array.from_string
-  |> do_write_bits(filepath)
-}
-
-@target(erlang)
-fn do_read(from filepath: String) -> Result(String, FileError) {
-  case do_read_bits(filepath) {
-    Ok(bits) -> {
-      case bit_array.to_string(bits) {
-        Ok(str) -> Ok(str)
-        _ -> Error(NotUtf8)
-      }
-    }
-    Error(e) -> Error(e)
-  }
-}
-
-@target(erlang)
-fn cast_error(input: Result(a, FileError)) -> Result(a, FileError) {
-  input
-}
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "make_directory")
-fn do_make_directory(directory: String) -> Result(Nil, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "make_symlink")
-fn do_make_symlink(target: String, symlink: String) -> Result(Nil, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "list_directory")
-fn do_read_directory(directory: String) -> Result(List(String), FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "create_dir_all")
-fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)
-
-@target(erlang)
-@external(erlang, "file", "copy")
-fn do_copy_file(src: String, dest: String) -> Result(Int, FileError)
-
-@target(erlang)
-@external(erlang, "simplifile_erl", "rename_file")
-fn do_rename_file(src: String, dest: String) -> Result(Nil, FileError)
+fn erl_do_current_directory() -> Result(List(UtfCodepoint), FileError)
