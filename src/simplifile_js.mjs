@@ -54,7 +54,7 @@ export function isFile(filepath) {
     if (e.code === "ENOENT") {
       return new Ok(false);
     } else {
-      return new GError(e.code);
+      return new GError(cast_error(e.code));
     }
   }
 }
@@ -72,7 +72,7 @@ export function isSymlink(filepath) {
     if (e.code === "ENOENT") {
       return new Ok(false);
     } else {
-      return new GError(e.code);
+      return new GError(cast_error(e.code));
     }
   }
 }
@@ -90,7 +90,7 @@ export function isDirectory(filepath) {
     if (e.code === "ENOENT") {
       return new Ok(false);
     } else {
-      return new GError(e.code);
+      return new GError(cast_error(e.code));
     }
   }
 }
@@ -120,7 +120,7 @@ export function createDirectory(filepath) {
  * Recursively create a directory structure from the given path.
  *
  * @param {string} filepath
- * @returns
+ * @returns {Ok | GError}
  */
 export function createDirAll(filepath) {
   return gleamResult(() => {
