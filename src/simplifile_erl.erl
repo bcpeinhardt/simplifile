@@ -80,11 +80,11 @@ read_file(Filename) ->
     posix_result(file:read_file(Filename)).
 
 %% Write bytes to a file
-write_file(Contents, Filename) ->
+write_file(Filename, Contents) ->
     posix_result(file:write_file(Filename, Contents)).
 
 %% Append bytes to a file
-append_file(Contents, Filename) ->
+append_file(Filename, Contents) ->
     posix_result(file:write_file(Filename, Contents, [append])).
 
 %% Delete the file at the given path
