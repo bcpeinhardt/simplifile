@@ -1,7 +1,6 @@
 # Changelog
 
 ## Unreleased
-- add `describe_error_test` tests 
 
 ## v2.0.0 - 1 June 2024
 - `verify_is_directory`, `verify_is_file`, `verify_is_symlink` become 
