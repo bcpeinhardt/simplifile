@@ -4,12 +4,17 @@ import gleam/set
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Eacces, Eio, Enoent, Eperm, Esrch, Execute, FilePermissions, NotUtf8, Read,
-  Unknown, Write, append, append_bits, copy_directory, copy_file,
-  create_directory, create_directory_all, create_file, create_symlink, delete,
-  delete_all, file_info, file_permissions_to_octal, get_files, is_directory,
-  is_file, is_symlink, read, read_bits, read_directory, rename_directory,
-  rename_file, set_permissions, set_permissions_octal, write, write_bits,
+  Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk, Edeadlock, Edquot, Eexist,
+  Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop, Emfile, Emlink, Emultihop,
+  Enametoolong, Enfile, Enobufs, Enodev, Enoent, Enolck, Enolink, Enomem, Enospc,
+  Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio, Eopnotsupp, Eoverflow,
+  Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale, Etxtbsy, Exdev, Execute,
+  FilePermissions, NotUtf8, Read, Unknown, Write, append, append_bits,
+  copy_directory, copy_file, create_directory, create_directory_all, create_file,
+  create_symlink, delete, delete_all, file_info, file_permissions_to_octal,
+  get_files, is_directory, is_file, is_symlink, read, read_bits, read_directory,
+  rename_directory, rename_file, set_permissions, set_permissions_octal, write,
+  write_bits,
 }
 
 pub fn main() {
@@ -498,6 +503,96 @@ pub fn describe_error_test() {
   let assert "No such process" = simplifile.describe_error(Esrch)
 
   let assert "Input/output error" = simplifile.describe_error(Eio)
+
+  let assert "Device not configured" = simplifile.describe_error(Enxio)
+
+  let assert "Bad file descriptor" = simplifile.describe_error(Ebadf)
+
+  let assert "Resource deadlock avoided" = simplifile.describe_error(Edeadlk)
+
+  let assert "Resource deadlock avoided" = simplifile.describe_error(Edeadlock)
+
+  let assert "Cannot allocate memory" = simplifile.describe_error(Enomem)
+
+  let assert "Permission denied" = simplifile.describe_error(Eacces)
+
+  let assert "Bad address" = simplifile.describe_error(Efault)
+
+  let assert "Block device required" = simplifile.describe_error(Enotblk)
+
+  let assert "Resource busy" = simplifile.describe_error(Ebusy)
+
+  let assert "File exists" = simplifile.describe_error(Eexist)
+
+  let assert "Cross-device link" = simplifile.describe_error(Exdev)
+
+  let assert "Operation not supported by device" =
+    simplifile.describe_error(Enodev)
+
+  let assert "Not a directory" = simplifile.describe_error(Enotdir)
+
+  let assert "Is a directory" = simplifile.describe_error(Eisdir)
+
+  let assert "Invalid argument" = simplifile.describe_error(Einval)
+
+  let assert "Too many open files in system" = simplifile.describe_error(Enfile)
+
+  let assert "Too many open files" = simplifile.describe_error(Emfile)
+
+  let assert "Text file busy" = simplifile.describe_error(Etxtbsy)
+
+  let assert "File too large" = simplifile.describe_error(Efbig)
+
+  let assert "No space left on device" = simplifile.describe_error(Enospc)
+
+  let assert "Illegal seek" = simplifile.describe_error(Espipe)
+
+  let assert "Read-only file system" = simplifile.describe_error(Erofs)
+
+  let assert "Too many links" = simplifile.describe_error(Emlink)
+
+  let assert "Broken pipe" = simplifile.describe_error(Epipe)
+
+  let assert "Result too large" = simplifile.describe_error(Erange)
+
+  let assert "Resource temporarily unavailable" =
+    simplifile.describe_error(Eagain)
+
+  let assert "Operation not supported" = simplifile.describe_error(Enotsup)
+
+  let assert "No buffer space available" = simplifile.describe_error(Enobufs)
+
+  let assert "Too many levels of symbolic links" =
+    simplifile.describe_error(Eloop)
+
+  let assert "File name too long" = simplifile.describe_error(Enametoolong)
+
+  let assert "Disc quota exceeded" = simplifile.describe_error(Edquot)
+
+  let assert "Stale NFS file handle" = simplifile.describe_error(Estale)
+
+  let assert "No locks available" = simplifile.describe_error(Enolck)
+
+  let assert "Function not implemented" = simplifile.describe_error(Enosys)
+
+  let assert "Inappropriate file type or format" =
+    simplifile.describe_error(Eftype)
+
+  let assert "Value too large to be stored in data type" =
+    simplifile.describe_error(Eoverflow)
+
+  let assert "Bad message" = simplifile.describe_error(Ebadmsg)
+
+  let assert "Multihop attempted" = simplifile.describe_error(Emultihop)
+
+  let assert "Link has been severed" = simplifile.describe_error(Enolink)
+
+  let assert "No STREAM resources" = simplifile.describe_error(Enosr)
+
+  let assert "Not a STREAM" = simplifile.describe_error(Enostr)
+
+  let assert "Operation not supported on socket" =
+    simplifile.describe_error(Eopnotsupp)
 
   let assert "File not UTF-8 encoded" = simplifile.describe_error(NotUtf8)
 
