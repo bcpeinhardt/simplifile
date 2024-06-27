@@ -4,12 +4,12 @@ import gleam/set
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Eacces, Enoent, Execute, FilePermissions, NotUtf8, Read, Write, append,
-  append_bits, copy_directory, copy_file, create_directory, create_directory_all,
-  create_file, create_symlink, delete, delete_all, file_info,
-  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink, read,
-  read_bits, read_directory, rename_directory, rename_file, set_permissions,
-  set_permissions_octal, write, write_bits,
+  Eacces, Eio, Enoent, Eperm, Esrch, Execute, FilePermissions, NotUtf8, Read,
+  Unknown, Write, append, append_bits, copy_directory, copy_file,
+  create_directory, create_directory_all, create_file, create_symlink, delete,
+  delete_all, file_info, file_permissions_to_octal, get_files, is_directory,
+  is_file, is_symlink, read, read_bits, read_directory, rename_directory,
+  rename_file, set_permissions, set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -488,4 +488,19 @@ pub fn deno_symlink_error_test() {
   let assert Ok(_) =
     create_symlink(from: "./tmp/simulated", to: "./tmp/target.txt")
   let assert Ok(_) = delete("./tmp/simulated")
+}
+
+pub fn describe_error_test() {
+  let assert "Operation not permitted" = simplifile.describe_error(Eperm)
+
+  let assert "No such file or directory" = simplifile.describe_error(Enoent)
+
+  let assert "No such process" = simplifile.describe_error(Esrch)
+
+  let assert "Input/output error" = simplifile.describe_error(Eio)
+
+  let assert "File not UTF-8 encoded" = simplifile.describe_error(NotUtf8)
+
+  let assert "Unknown error: Something went wrong" =
+    simplifile.describe_error(Unknown("Something went wrong"))
 }
