@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v2.0.1 - 27 June 2024
+- Internal refactoring and some added tests
+
 ## v2.0.0 - 1 June 2024
 - `verify_is_directory`, `verify_is_file`, `verify_is_symlink` become 
   `is_directory`, `is_file`, `is_symlink respectively`. Deprecated `is_file` and `is_directory` removed.
