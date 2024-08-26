@@ -203,12 +203,28 @@ export function currentDirectory() {
  * @returns {Ok | GError}
  */
 export function fileInfo(filepath) {
-  return gleamResult(() => new FileInfo(filepath));
+  return gleamResult(() => {
+    const stat = fs.statSync(path.normalize(filepath))
+    return new FileInfo(stat)
+  });
+}
+
+/**
+ * @param {string} filepath
+ * @returns {Ok | GError}
+ */
+export function linkInfo(filepath) {
+  return gleamResult(() => {
+    const stat = fs.lstatSync(path.normalize(filepath))
+    return new FileInfo(stat)
+  })
 }
 
 class FileInfo {
-  constructor(filepath) {
-    const stat = fs.statSync(path.normalize(filepath));
+  /**
+   * @param {fs.Stats} stat
+   */
+  constructor(stat) {
     this.size = stat.size;
     this.mode = stat.mode;
     this.nlinks = stat.nlink;

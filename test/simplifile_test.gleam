@@ -12,9 +12,9 @@ import simplifile.{
   FilePermissions, NotUtf8, Read, Unknown, Write, append, append_bits,
   copy_directory, copy_file, create_directory, create_directory_all, create_file,
   create_symlink, delete, delete_all, file_info, file_permissions_to_octal,
-  get_files, is_directory, is_file, is_symlink, read, read_bits, read_directory,
-  rename_directory, rename_file, set_permissions, set_permissions_octal, write,
-  write_bits,
+  get_files, is_directory, is_file, is_symlink, link_info, read, read_bits,
+  read_directory, rename_directory, rename_file, set_permissions,
+  set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -471,6 +471,22 @@ pub fn no_read_permissions_test() {
 
 pub fn file_info_test() {
   let assert Ok(_info) = file_info("./test.sh")
+}
+
+pub fn link_info_test() {
+  let target_path = "./tmp/the_target"
+  let symlink_path = "./tmp/the_symlink"
+  let target_relative_to_symlink = "the_target"
+
+  let assert Ok(_) = write(to: target_path, contents: "Wibble")
+  let assert Ok(_) = create_symlink(target_relative_to_symlink, symlink_path)
+
+  let assert Ok(lstat) = link_info(symlink_path)
+  let assert Ok(stat) = file_info(symlink_path)
+
+  let assert False = stat == lstat
+  let assert True = stat.size == 6
+  let assert False = lstat.size == 6
 }
 
 /// I visually inspected this info to make sure it matched on all targets.
