@@ -560,19 +560,15 @@ pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use contents <- result.try(read_directory(directory))
   use acc, content <- list.try_fold(over: contents, from: [])
   let path = filepath.join(directory, content)
+  use info <- result.try(file_info(path))
 
-  case is_file(path) {
-    Error(e) -> Error(e)
-    Ok(True) -> Ok([path, ..acc])
-    Ok(False) ->
-      case is_directory(path) {
-        Error(e) -> Error(e)
-        Ok(False) -> Ok(acc)
-        Ok(True) -> {
-          use nested_files <- result.try(get_files(path))
-          Ok(list.append(acc, nested_files))
-        }
-      }
+  case file_info_type(info) {
+    File -> Ok([path, ..acc])
+    Directory -> {
+      use nested_files <- result.try(get_files(path))
+      Ok(list.append(acc, nested_files))
+    }
+    _ -> Ok(acc)
   }
 }
 
