@@ -484,9 +484,14 @@ pub fn link_info_test() {
   let assert Ok(lstat) = link_info(symlink_path)
   let assert Ok(stat) = file_info(symlink_path)
 
-  let assert False = stat == lstat
-  let assert True = stat.size == 6
-  let assert False = lstat.size == 6
+  stat
+  |> should.not_equal(lstat)
+
+  stat.size
+  |> should.equal(6)
+
+  lstat.size
+  |> should.not_equal(6)
 }
 
 /// I visually inspected this info to make sure it matched on all targets.
