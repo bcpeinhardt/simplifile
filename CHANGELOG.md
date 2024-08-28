@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Add `FileInfo` and `file_info_type` to get the file type from a `FileInfo` without checking the file system again
+- Add `file_info_permissions` and `file_info_permissions_octal` to get the currently set permissions of a file or directory.
 
 ## v2.0.1 - 27 June 2024
 - Internal refactoring and some added tests
