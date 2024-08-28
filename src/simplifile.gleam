@@ -210,6 +210,55 @@ pub type FileInfo {
   )
 }
 
+/// Extract the file permissions from a given FileInfo value in their octal representation.
+///
+/// ## Example
+/// ```gleam
+/// use info <- result.try(simplifile.file_info("src/app.gleam"))
+/// simplifile.file_info_permissions_octal(info)
+/// // --> 0o644
+/// ```
+pub fn file_info_permissions_octal(from file_info: FileInfo) -> Int {
+  int.bitwise_and(file_info.mode, 0o777)
+}
+
+/// Extract the `FilePermissions` from a given FileInfo value.
+pub fn file_info_permissions(from file_info: FileInfo) -> FilePermissions {
+  octal_to_file_permissions(file_info_permissions_octal(file_info))
+}
+
+/// An enumeration of different types of files.
+pub type FileType {
+  /// A regular file
+  File
+  /// A directory
+  Directory
+  /// A symbolic link
+  Symlink
+  /// Another special file type present on some systems, lika a socket or device
+  Other
+}
+
+/// Extract the file type from a given FileInfo value.
+///
+/// ## Example
+/// ```gleam
+/// use info <- result.try(simplifile.file_info("src/app.gleam"))
+/// simplifile.file_info_type(info)
+/// // --> simplifile.File
+/// ```
+pub fn file_info_type(from file_info: FileInfo) -> FileType {
+  // S_IFMT and related constants;
+  // see https://www.man7.org/linux/man-pages/man7/inode.7.html
+  // see https://github.com/nodejs/node/blob/main/typings/internalBinding/constants.d.ts#L147
+  case int.bitwise_and(file_info.mode, 0o170000) {
+    0o100000 -> File
+    0o40000 -> Directory
+    0o120000 -> Symlink
+    _ -> Other
+  }
+}
+
 /// Get information about a file at a given path
 ///
 /// When the given `filepath` points to a symlink, this function will follow
@@ -526,19 +575,15 @@ pub fn get_files(in directory: String) -> Result(List(String), FileError) {
   use contents <- result.try(read_directory(directory))
   use acc, content <- list.try_fold(over: contents, from: [])
   let path = filepath.join(directory, content)
+  use info <- result.try(file_info(path))
 
-  case is_file(path) {
-    Error(e) -> Error(e)
-    Ok(True) -> Ok([path, ..acc])
-    Ok(False) ->
-      case is_directory(path) {
-        Error(e) -> Error(e)
-        Ok(False) -> Ok(acc)
-        Ok(True) -> {
-          use nested_files <- result.try(get_files(path))
-          Ok(list.append(acc, nested_files))
-        }
-      }
+  case file_info_type(info) {
+    File -> Ok([path, ..acc])
+    Directory -> {
+      use nested_files <- result.try(get_files(path))
+      Ok(list.append(acc, nested_files))
+    }
+    _ -> Ok(acc)
   }
 }
 
@@ -554,6 +599,21 @@ fn permission_to_integer(permission: Permission) -> Int {
     Read -> 0o4
     Write -> 0o2
     Execute -> 0o1
+  }
+}
+
+fn integer_to_permissions(integer: Int) -> Set(Permission) {
+  case int.bitwise_and(integer, 7) {
+    7 -> set.from_list([Read, Write, Execute])
+    6 -> set.from_list([Read, Write])
+    5 -> set.from_list([Read, Execute])
+    3 -> set.from_list([Write, Execute])
+    4 -> set.from_list([Read])
+    2 -> set.from_list([Write])
+    1 -> set.from_list([Execute])
+    0 -> set.new()
+    // since  we bitwise_and, these are all possible values.
+    _ -> panic
   }
 }
 
@@ -579,6 +639,19 @@ pub fn file_permissions_to_octal(permissions: FilePermissions) -> Int {
   + make_permission_digit(permissions.group)
   * 8
   + make_permission_digit(permissions.other)
+}
+
+fn octal_to_file_permissions(octal: Int) -> FilePermissions {
+  FilePermissions(
+    user: octal
+      |> int.bitwise_shift_right(6)
+      |> integer_to_permissions,
+    group: octal
+      |> int.bitwise_shift_right(3)
+      |> integer_to_permissions,
+    other: octal
+      |> integer_to_permissions,
+  )
 }
 
 /// Sets the permissions for a given file

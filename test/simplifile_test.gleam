@@ -4,17 +4,18 @@ import gleam/set
 import gleeunit
 import gleeunit/should
 import simplifile.{
-  Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk, Edeadlock, Edquot, Eexist,
-  Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop, Emfile, Emlink, Emultihop,
-  Enametoolong, Enfile, Enobufs, Enodev, Enoent, Enolck, Enolink, Enomem, Enospc,
-  Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio, Eopnotsupp, Eoverflow,
-  Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale, Etxtbsy, Exdev, Execute,
-  FilePermissions, NotUtf8, Read, Unknown, Write, append, append_bits,
-  copy_directory, copy_file, create_directory, create_directory_all, create_file,
-  create_symlink, delete, delete_all, file_info, file_permissions_to_octal,
-  get_files, is_directory, is_file, is_symlink, link_info, read, read_bits,
-  read_directory, rename_directory, rename_file, set_permissions,
-  set_permissions_octal, write, write_bits,
+  Directory, Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk, Edeadlock, Edquot,
+  Eexist, Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop, Emfile, Emlink,
+  Emultihop, Enametoolong, Enfile, Enobufs, Enodev, Enoent, Enolck, Enolink,
+  Enomem, Enospc, Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio,
+  Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale,
+  Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read, Unknown, Write,
+  append, append_bits, copy_directory, copy_file, create_directory,
+  create_directory_all, create_file, create_symlink, delete, delete_all,
+  file_info, file_info_permissions, file_info_permissions_octal, file_info_type,
+  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
+  link_info, read, read_bits, read_directory, rename_directory, rename_file,
+  set_permissions, set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -422,6 +423,36 @@ pub fn permissions_octal_test() {
   let assert Ok(Nil) = delete("./tmp/permissions")
 }
 
+pub fn file_info_get_permissions_test() {
+  let filepath = "./tmp/permissions/test.sh"
+  let assert Ok(Nil) = create_directory("./tmp/permissions")
+  let assert Ok(Nil) = write("echo \"Hello from a file\"", to: filepath)
+
+  // This is the equivalent of `chmod 777 ./tmp/permissions/test.sh`
+  let all = set.from_list([Read, Write, Execute])
+  let all = FilePermissions(user: all, group: all, other: all)
+  let assert Ok(Nil) = set_permissions(filepath, all)
+  let assert Ok(info) = file_info(filepath)
+
+  file_info_permissions(info)
+  |> should.equal(all)
+
+  file_info_permissions_octal(info)
+  |> should.equal(0o777)
+
+  let assert Ok(Nil) = set_permissions_octal(filepath, 0o625)
+  let assert Ok(info) = file_info(filepath)
+
+  file_info_permissions(info)
+  |> should.equal(FilePermissions(
+    user: set.from_list([Read, Write]),
+    group: set.from_list([Write]),
+    other: set.from_list([Read, Execute]),
+  ))
+
+  let assert Ok(Nil) = delete("./tmp/permissions")
+}
+
 pub fn get_files_with_slash_test() {
   let assert Ok(files) = get_files(in: "./test/")
   files
@@ -471,6 +502,27 @@ pub fn no_read_permissions_test() {
 
 pub fn file_info_test() {
   let assert Ok(_info) = file_info("./test.sh")
+}
+
+pub fn file_info_type_test() {
+  let filepath = "./tmp/file_info_type_test.txt"
+  let assert Ok(_) = write(to: filepath, contents: "")
+  let assert Ok(info) = file_info(filepath)
+  file_info_type(info)
+  |> should.equal(File)
+
+  let assert Ok(info) = file_info("./tmp")
+  file_info_type(info)
+  |> should.equal(Directory)
+
+  let linkpath = "./tmp/file_info_type_symlink"
+  let assert Ok(_) = create_symlink("file_info_type_test.txt", linkpath)
+  let assert Ok(info) = file_info(linkpath)
+  file_info_type(info)
+  |> should.equal(File)
+  // let assert Ok(info) = link_info(linkpath)
+  // file_info_type(info)
+  // |> should.equal(Symlink)
 }
 
 pub fn link_info_test() {
