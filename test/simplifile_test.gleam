@@ -13,9 +13,9 @@ import simplifile.{
   append, append_bits, copy_directory, copy_file, create_directory,
   create_directory_all, create_file, create_symlink, delete, delete_all,
   file_info, file_info_permissions, file_info_permissions_octal, file_info_type,
-  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink, read,
-  read_bits, read_directory, rename_directory, rename_file, set_permissions,
-  set_permissions_octal, write, write_bits,
+  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
+  link_info, read, read_bits, read_directory, rename_directory, rename_file,
+  set_permissions, set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -503,7 +503,6 @@ pub fn no_read_permissions_test() {
 pub fn file_info_test() {
   let assert Ok(_info) = file_info("./test.sh")
 }
-
 
 pub fn file_info_type_test() {
   let filepath = "./tmp/file_info_type_test.txt"
