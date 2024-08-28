@@ -211,9 +211,24 @@ pub type FileInfo {
 }
 
 /// Get information about a file at a given path
+///
+/// When the given `filepath` points to a symlink, this function will follow
+/// the symlink and return information about the target file.
+///
+/// See `link_info` if you want to get information about a symlink instead.
 @external(erlang, "simplifile_erl", "file_info")
 @external(javascript, "./simplifile_js.mjs", "fileInfo")
 pub fn file_info(filepath: String) -> Result(FileInfo, FileError)
+
+/// Get information about a file at a given path
+///
+/// When the given `filepath` is a symlink, this function will return
+/// infromation about the symlink itself.
+///
+/// See `file_info` if you want to follow symlinks instead.
+@external(erlang, "simplifile_erl", "link_info")
+@external(javascript, "./simplifile_js.mjs", "linkInfo")
+pub fn link_info(filepath: String) -> Result(FileInfo, FileError)
 
 /// Read a files contents as a string
 /// ## Example
