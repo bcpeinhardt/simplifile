@@ -449,6 +449,8 @@ pub fn file_info_get_permissions_test() {
     group: set.from_list([Write]),
     other: set.from_list([Read, Execute]),
   ))
+
+  let assert Ok(Nil) = delete("./tmp/permissions")
 }
 
 pub fn get_files_with_slash_test() {
