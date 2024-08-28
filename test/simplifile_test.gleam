@@ -504,6 +504,7 @@ pub fn file_info_test() {
   let assert Ok(_info) = file_info("./test.sh")
 }
 
+
 pub fn file_info_type_test() {
   let filepath = "./tmp/file_info_type_test.txt"
   let assert Ok(_) = write(to: filepath, contents: "")
@@ -523,6 +524,27 @@ pub fn file_info_type_test() {
   // let assert Ok(info) = link_info(linkpath)
   // file_info_type(info)
   // |> should.equal(Symlink)
+}
+
+pub fn link_info_test() {
+  let target_path = "./tmp/the_target"
+  let symlink_path = "./tmp/the_symlink"
+  let target_relative_to_symlink = "the_target"
+
+  let assert Ok(_) = write(to: target_path, contents: "Wibble")
+  let assert Ok(_) = create_symlink(target_relative_to_symlink, symlink_path)
+
+  let assert Ok(lstat) = link_info(symlink_path)
+  let assert Ok(stat) = file_info(symlink_path)
+
+  stat
+  |> should.not_equal(lstat)
+
+  stat.size
+  |> should.equal(6)
+
+  lstat.size
+  |> should.not_equal(6)
 }
 
 /// I visually inspected this info to make sure it matched on all targets.

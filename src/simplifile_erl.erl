@@ -16,6 +16,7 @@
     delete/1,
     delete_directory/1,
     file_info/1,
+    link_info/1,
     is_directory/1,
     is_file/1,
     is_symlink/1,
@@ -223,3 +224,6 @@ file_info_result(Result) ->
 
 file_info(Filename) ->
     file_info_result(file:read_file_info(Filename, [{time, posix}])).
+
+link_info(Filename) ->
+    file_info_result(file:read_link_info(Filename, [{time, posix}])).
