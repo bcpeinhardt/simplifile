@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Add `link_info` function to get `FileInfo` values without following symlinks
 
 ## v2.0.1 - 27 June 2024
 - Internal refactoring and some added tests
