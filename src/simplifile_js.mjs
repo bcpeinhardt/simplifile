@@ -167,17 +167,6 @@ export function copyFile(srcpath, destpath) {
 }
 
 /**
- * Copy a file to a new path.
- *
- * @param {string} srcpath
- * @param {string} destpath
- * @returns {Ok | GError}
- */
-export function copy(srcpath, destpath) {
-  return gleamResult(() => fs.cpSync(path.normalize(srcpath), path.normalize(destpath)))
-}
-
-/**
  * Move a file to the new path.
  *
  * @param {string} srcpath
