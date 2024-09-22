@@ -2,7 +2,7 @@
 
 ## Unreleased
 - Add `copy` function which can copy a file or a directory.
-- Replace `rename_file` and `rename_directory` with just `rename` which does both.
+- Deprecate `rename_file` and `rename_directory` in favor of `rename` which does both.
 - Refactor `copy_directory` to make fewer file system calls.
 - Add some helpful docs for creating symlinks.
 
