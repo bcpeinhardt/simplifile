@@ -413,6 +413,9 @@ pub fn is_directory(filepath: String) -> Result(Bool, FileError)
 pub fn create_directory(filepath: String) -> Result(Nil, FileError)
 
 /// Create a symbolic link called symlink pointing to target.
+/// Footgun Alert: the target path is relative to *the symlink*,
+/// not the current working directory. I will likely be updating 
+/// the label on the next major version to reflect that.
 ///
 /// ## Example
 /// ```gleam
@@ -492,6 +495,24 @@ pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
 @external(javascript, "./simplifile_js.mjs", "createDirAll")
 fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)
 
+/// Copy a file or a directory to a new path. Copies directories recursively.
+/// Performance note: This function does work to determine if the src path
+/// points to a file or a directory. Consider using one of the the dedicated 
+/// functions `copy_file` or `copy_directory` if you already know which one you need.
+pub fn copy(src src: String, dest dest: String) -> Result(Nil, FileError) {
+  use src_info <- result.try(file_info(src))
+  case file_info_type(src_info) {
+    File -> copy_file(src, dest)
+    Directory -> copy_directory(src, dest)
+    Symlink ->
+      Error(Unknown(
+        "This is an internal bug where the `file_info` is somehow returning info about a simlink. Please file an issue on the simplifile repo.",
+      ))
+    Other ->
+      Error(Unknown("Unknown file type (not file, directory, or simlink)"))
+  }
+}
+
 /// Copy a file at a given path to another path.
 /// Note: destination should include the filename, not just the directory
 pub fn copy_file(at src: String, to dest: String) -> Result(Nil, FileError) {
@@ -505,9 +526,15 @@ fn do_copy_file(src: String, dest: String) -> Result(Int, FileError)
 
 /// Rename a file at a given path to another path.
 /// Note: destination should include the filename, not just the directory
+@deprecated("This function can move a file or a directory, so it's being renamed `rename`.")
 @external(erlang, "simplifile_erl", "rename_file")
 @external(javascript, "./simplifile_js.mjs", "renameFile")
 pub fn rename_file(at src: String, to dest: String) -> Result(Nil, FileError)
+
+/// Rename a file or directory.
+@external(erlang, "simplifile_erl", "rename_file")
+@external(javascript, "./simplifile_js.mjs", "renameFile")
+pub fn rename(at src: String, to dest: String) -> Result(Nil, FileError)
 
 /// Copy a directory recursively
 pub fn copy_directory(at src: String, to dest: String) -> Result(Nil, FileError) {
@@ -526,31 +553,34 @@ fn do_copy_directory(src: String, dest: String) -> Result(Nil, FileError) {
     let src_path = filepath.join(src, segment)
     let dest_path = filepath.join(dest, segment)
 
-    case is_file(src_path), is_directory(src_path) {
-      Ok(True), Ok(False) -> {
+    use src_info <- result.try(file_info(src_path))
+    case file_info_type(src_info) {
+      File -> {
         // For a file, create the file in the new directory
         use content <- result.try(read_bits(src_path))
         content
         |> write_bits(to: dest_path)
       }
-      Ok(False), Ok(True) -> {
+      Directory -> {
         // Create the target directory and recurse
         use _ <- result.try(create_directory(dest_path))
         do_copy_directory(src_path, dest_path)
       }
-      Error(e), _ | _, Error(e) -> {
-        Error(e)
-      }
-      Ok(False), Ok(False) | Ok(True), Ok(True) -> {
-        // We're really not sure how that one happened.
-        Error(Unknown("Unknown error copying directory"))
-      }
+      // Theoretically this shouldn't happen, as the file info function
+      // will follow a simlink.
+      Symlink ->
+        Error(Unknown(
+          "This is an internal bug where the `file_info` is somehow returning info about a simlink. Please file an issue on the simplifile repo.",
+        ))
+      Other ->
+        Error(Unknown("Unknown file type (not file, directory, or simlink)"))
     }
   })
   Ok(Nil)
 }
 
 /// Copy a directory recursively and then delete the old one.
+@deprecated("Use the `rename` function, which can rename a file or a directory.")
 pub fn rename_directory(
   at src: String,
   to dest: String,
