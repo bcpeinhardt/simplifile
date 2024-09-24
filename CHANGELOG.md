@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+- Add `copy` function which can copy a file or a directory.
+- Deprecate `rename_file` and `rename_directory` in favor of `rename` which does both.
+- Refactor `copy_directory` to make fewer file system calls.
+- Add some helpful docs for creating symlinks.
 
 ## v2.1.0 - 28 August 2024
 - Add `FileInfo` and `file_info_type` to get the file type from a `FileInfo` without checking the file system again

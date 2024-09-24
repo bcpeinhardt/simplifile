@@ -10,12 +10,12 @@ import simplifile.{
   Enomem, Enospc, Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio,
   Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale,
   Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read, Unknown, Write,
-  append, append_bits, copy_directory, copy_file, create_directory,
+  append, append_bits, copy, copy_directory, copy_file, create_directory,
   create_directory_all, create_file, create_symlink, delete, delete_all,
   file_info, file_info_permissions, file_info_permissions_octal, file_info_type,
   file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
-  link_info, read, read_bits, read_directory, rename_directory, rename_file,
-  set_permissions, set_permissions_octal, write, write_bits,
+  link_info, read, read_bits, read_directory, rename, set_permissions,
+  set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -224,7 +224,7 @@ pub fn copy_test() {
 pub fn rename_test() {
   let assert Ok(_) = write("Hello", to: "./tmp/to_be_renamed.txt")
   let assert Ok(Nil) =
-    rename_file("./tmp/to_be_renamed.txt", to: "./tmp/renamed.txt")
+    rename("./tmp/to_be_renamed.txt", to: "./tmp/renamed.txt")
   let assert Ok(False) = is_file("./tmp/to_be_renamed.txt")
   let assert Ok(True) = is_file("./tmp/renamed.txt")
   let assert Ok(_) = delete("./tmp/renamed.txt")
@@ -266,8 +266,7 @@ pub fn rename_directory_test() {
     |> write(to: "./tmp/to_be_copied_dir/nested_dir/file.txt")
 
   // Copy the directory
-  let assert Ok(_) =
-    rename_directory("./tmp/to_be_copied_dir", to: "./tmp/copied_dir")
+  let assert Ok(_) = rename("./tmp/to_be_copied_dir", to: "./tmp/copied_dir")
 
   // Assert the contents are correct
   let assert Ok("Hello") = read("./tmp/copied_dir/file.txt")
@@ -546,8 +545,6 @@ pub fn link_info_test() {
   |> should.not_equal(6)
 }
 
-/// I visually inspected this info to make sure it matched on all targets.
-/// TODO: Add a better test setup for validating file info functionality.
 pub fn clear_directory_test() {
   let assert Ok(_) = create_directory_all("./tmp/clear_dir")
   let assert Ok(_) = create_directory_all("./tmp/clear_dir/nested_dir")
@@ -671,4 +668,60 @@ pub fn describe_error_test() {
 
   let assert "Unknown error: Something went wrong" =
     simplifile.describe_error(Unknown("Something went wrong"))
+}
+
+pub fn file_info_follows_simlinks_recursively_test() {
+  let assert Ok(_) = create_file("./tmp/base.txt")
+  let assert Ok(_) = create_symlink(from: "./tmp/layer_1.txt", to: "./base.txt")
+  let assert Ok(_) =
+    create_symlink(from: "./tmp/layer_2.txt", to: "./layer_1.txt")
+
+  let assert Ok(fi) = file_info("./tmp/layer_2.txt")
+  fi |> file_info_type |> should.equal(File)
+
+  let assert Ok(_) = create_directory("./tmp/base_dir")
+  let assert Ok(_) = create_symlink(from: "./tmp/layer_1_dir", to: "./base_dir")
+  let assert Ok(_) =
+    create_symlink(from: "./tmp/layer_2_dir", to: "./layer_1_dir")
+
+  let assert Ok(fi) = file_info("./tmp/layer_2_dir")
+  fi |> file_info_type |> should.equal(Directory)
+}
+
+pub fn copy_can_copy_whatever_test() {
+  let og_file = "./tmp/toodaloofile.txt"
+  let og_dir = "./tmp/toodaloofile_dir"
+  let symlink_to_file = "./tmp/toodaloolink.txt"
+
+  let assert Ok(_) = write("Hello", to: og_file)
+  let assert Ok(_) = create_directory(og_dir)
+  let assert Ok(_) = write("Hello subfile", to: og_dir <> "/subfile.txt")
+  let assert Ok(_) =
+    create_symlink(from: symlink_to_file, to: "./toodaloofile.txt")
+
+  let assert Ok(_) = copy(og_file, "./tmp/toodaloo_copied.txt")
+  let assert Ok("Hello") = read("./tmp/toodaloo_copied.txt")
+
+  let assert Ok(_) = copy(og_dir, "./tmp/toodaloo_copied_dir")
+  let assert Ok(["subfile.txt"]) = read_directory("./tmp/toodaloo_copied_dir")
+  let assert Ok("Hello subfile") = read("./tmp/toodaloo_copied_dir/subfile.txt")
+
+  let assert Ok(_) = copy(symlink_to_file, "./tmp/copied_link.txt")
+  let assert Ok("Hello") = read("./tmp/copied_link.txt")
+}
+
+pub fn rename_file_succeeds_at_renaming_a_directory_test() {
+  // I am so dumb lol
+
+  let dir = "./tmp/i_am_a_dir"
+  let file = dir <> "/i_am_a_file.txt"
+  let assert Ok(_) = create_directory_all(dir)
+  let assert Ok(_) = write("Hello", to: file)
+  let new_dir = "./tmp/i_am_also_a_dir"
+
+  let assert Ok(_) = rename(at: dir, to: new_dir)
+
+  let assert Ok(fi) = file_info(new_dir)
+  fi |> file_info_type |> should.equal(Directory)
+  read(new_dir <> "/i_am_a_file.txt") |> should.be_ok |> should.equal("Hello")
 }
