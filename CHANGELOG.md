@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+
+## v2.2.0 - 23 September 2024
 - Add `copy` function which can copy a file or a directory.
 - Deprecate `rename_file` and `rename_directory` in favor of `rename` which does both.
 - Refactor `copy_directory` to make fewer file system calls.

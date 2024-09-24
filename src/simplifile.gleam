@@ -413,7 +413,9 @@ pub fn is_directory(filepath: String) -> Result(Bool, FileError)
 pub fn create_directory(filepath: String) -> Result(Nil, FileError)
 
 /// Create a symbolic link called symlink pointing to target.
-/// Footgun Alert: the target path is relative to *the symlink*,
+/// 
+/// ### Footgun Alert 
+/// the target path is relative to *the symlink*,
 /// not the current working directory. I will likely be updating 
 /// the label on the next major version to reflect that.
 ///
@@ -496,7 +498,9 @@ pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
 fn do_create_dir_all(dirpath: String) -> Result(Nil, FileError)
 
 /// Copy a file or a directory to a new path. Copies directories recursively.
-/// Performance note: This function does work to determine if the src path
+/// 
+/// ### Performance Note 
+/// This function does work to determine if the src path
 /// points to a file or a directory. Consider using one of the the dedicated 
 /// functions `copy_file` or `copy_directory` if you already know which one you need.
 pub fn copy(src src: String, dest dest: String) -> Result(Nil, FileError) {
