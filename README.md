@@ -3,29 +3,29 @@
 [![Package Version](https://img.shields.io/hexpm/v/simplifile)](https://hex.pm/packages/simplifile)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/simplifile/)
 
-Simplifile provides synchronous operations for working with files and directories that work for all 
-non-browser targets (Erlang, Node, Deno, and Bun). 
+Simplifile provides synchronous operations for working with files and directories that work for all
+non-browser targets (Erlang, Node, Deno, and Bun).
 
 ## When should I use `simplifile`?
 
-Simplifile makes a simple tradeoff: it confines itself to a subset of purely synchronous file/directory utilities 
+Simplifile makes a simple tradeoff: it confines itself to a subset of purely synchronous file/directory utilities
 so that it can have one API for all targets. Erlang and JavaScript have fundamentally different concurrency
 models, so bindings to async code will simply be different for different targets.
 
-You *should* use simplifile if 
+You *should* use simplifile if
 1. The same code running on JS and Erlang targets is important
 2. Sync file operations will not be a major performance bottleneck (dev tooling, configuration, scripting, etc.)
 3. You just wanna do some basic file operations and get on with life
 
 If you think you need a different solutions, these projects may be helpful:
-[File streams (erlang target)](https://github.com/richard-viney/file_streams)
+[File streams](https://github.com/richard-viney/file_streams)
 
 ## Upgrading to 2.0
 
 Please consult the changelog, but basically:
 The deprecated `is_file`, `is_directory` functions have been removed.
 The `verify_is_file`, `verify_is_directory`, and `verify_is_symlink` have had their verify_ prefixes removed (now `is_file`, `is_directory`, `is_symlink` respectively).
-The `Unknown` variant of `FileError` now has an inner `String`. 
+The `Unknown` variant of `FileError` now has an inner `String`.
 
 ## Example
 ```gleam
