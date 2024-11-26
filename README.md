@@ -13,9 +13,9 @@ so that it can have one API for all targets. Erlang and JavaScript have fundamen
 models, so bindings to async code will simply be different for different targets.
 
 You *should* use simplifile if
-1. The same code running on JS and Erlang targets is important
-2. Sync file operations will not be a major performance bottleneck (dev tooling, configuration, scripting, etc.)
-3. You just wanna do some basic file operations and get on with life
+1. The same code running on JS and Erlang targets is important.
+2. Sync file operations will not be a major performance bottleneck (dev tooling, configuration, scripting, etc.).
+3. You just wanna do some basic file operations and get on with life.
 
 If you think you need a different solutions, these projects may be helpful:
 [File streams](https://github.com/richard-viney/file_streams)
