@@ -27,7 +27,9 @@ export function readBits(filepath) {
  * @returns {Ok | GError}
  */
 export function writeBits(filepath, contents) {
-  return gleamResult(() => fs.writeFileSync(path.normalize(filepath), contents.buffer));
+  return gleamResult(() =>
+    fs.writeFileSync(path.normalize(filepath), contents.rawBuffer),
+  );
 }
 
 /**
@@ -38,7 +40,9 @@ export function writeBits(filepath, contents) {
  * @returns {Ok | GError}
  */
 export function appendBits(filepath, contents) {
-  return gleamResult(() => fs.appendFileSync(path.normalize(filepath), contents.buffer));
+  return gleamResult(() =>
+    fs.appendFileSync(path.normalize(filepath), contents.rawBuffer),
+  );
 }
 
 /**
@@ -163,7 +167,9 @@ export function readDirectory(filepath) {
  * @returns {Ok | GError}
  */
 export function copyFile(srcpath, destpath) {
-  return gleamResult(() => fs.copyFileSync(path.normalize(srcpath), path.normalize(destpath)));
+  return gleamResult(() =>
+    fs.copyFileSync(path.normalize(srcpath), path.normalize(destpath)),
+  );
 }
 
 /**
@@ -174,7 +180,9 @@ export function copyFile(srcpath, destpath) {
  * @returns {Ok | GError}
  */
 export function renameFile(srcpath, destpath) {
-  return gleamResult(() => fs.renameSync(path.normalize(srcpath), path.normalize(destpath)));
+  return gleamResult(() =>
+    fs.renameSync(path.normalize(srcpath), path.normalize(destpath)),
+  );
 }
 
 /**
@@ -204,8 +212,8 @@ export function currentDirectory() {
  */
 export function fileInfo(filepath) {
   return gleamResult(() => {
-    const stat = fs.statSync(path.normalize(filepath))
-    return new FileInfo(stat)
+    const stat = fs.statSync(path.normalize(filepath));
+    return new FileInfo(stat);
   });
 }
 
@@ -215,9 +223,9 @@ export function fileInfo(filepath) {
  */
 export function linkInfo(filepath) {
   return gleamResult(() => {
-    const stat = fs.lstatSync(path.normalize(filepath))
-    return new FileInfo(stat)
-  })
+    const stat = fs.lstatSync(path.normalize(filepath));
+    return new FileInfo(stat);
+  });
 }
 
 class FileInfo {

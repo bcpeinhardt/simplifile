@@ -4,15 +4,15 @@ description = "Basic file operations that work on all targets"
 
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "bcpeinhardt", repo = "simplifile" }
-gleam = ">= 0.32.0"
+gleam = ">= 1.9.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 [javascript.deno]
 allow_all = true
 
 [dependencies]
-gleam_stdlib = "~> 0.34 or ~> 1.0"
-filepath = "~> 1.0"
+gleam_stdlib = ">= 0.34.0 and < 2.0.0"
+filepath = ">= 1.0.0 and < 2.0.0"
 
 [dev-dependencies]
-gleeunit = "~> 1.0"
+gleeunit = ">= 1.0.0 and < 2.0.0"
