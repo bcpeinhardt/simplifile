@@ -97,11 +97,17 @@ read_bits(Filename) ->
 
 %% Write bytes to a file
 write_bits(Filename, Contents) ->
-    posix_result(file:write_file(Filename, Contents)).
+    case bit_size(Contents) rem 8 of
+        0 -> posix_result(file:write_file(Filename, Contents));
+        _ -> {error, einval}
+    end.
 
 %% Append bytes to a file
 append_bits(Filename, Contents) ->
-    posix_result(file:write_file(Filename, Contents, [append])).
+    case bit_size(Contents) rem 8 of
+        0 -> posix_result(file:write_file(Filename, Contents, [append]));
+        _ -> {error, einval}
+    end.
 
 %% Delete the file at the given path
 delete_file(Filename) ->

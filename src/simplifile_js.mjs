@@ -28,7 +28,7 @@ export function readBits(filepath) {
  */
 export function writeBits(filepath, contents) {
   return gleamResult(() =>
-    fs.writeFileSync(path.normalize(filepath), contents.rawBuffer),
+    fs.writeFileSync(path.normalize(filepath), toUint8Array(contents))
   );
 }
 
@@ -41,8 +41,30 @@ export function writeBits(filepath, contents) {
  */
 export function appendBits(filepath, contents) {
   return gleamResult(() =>
-    fs.appendFileSync(path.normalize(filepath), contents.rawBuffer),
+    fs.appendFileSync(path.normalize(filepath), toUint8Array(contents))
   );
+}
+
+/**
+ * Returns a BitArray as an aligned Uint8Array. Avoids a copy when possible.
+ *
+ * @param {BitArray} contents
+ * @returns Uint8Array
+ */
+function toUint8Array(contents) {
+  if (contents.bitSize % 8 !== 0) {
+    throw new GError(new $simplifile.Einval());
+  }
+
+  let buffer = contents.rawBuffer;
+  if (contents.bitOffset !== 0) {
+    buffer = new Uint8Array(contents.byteSize);
+    for (let i = 0; i < buffer.length; i++) {
+      buffer[i] = contents.byteAt(i);
+    }
+  }
+
+  return buffer;
 }
 
 /**
