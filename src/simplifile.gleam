@@ -176,7 +176,9 @@ pub fn describe_error(error: FileError) -> String {
 }
 
 /// Represents the intersection of information available
-/// from erlang's `file:read_file_info` and node's `fs.stat`
+/// from erlang's `file:read_file_info` and node's `fs.stat`.
+/// For more details on what these things mean, see:
+/// [the man page](https://www.man7.org/linux/man-pages/man7/inode.7.html)
 pub type FileInfo {
   FileInfo(
     /// File size in bytes.

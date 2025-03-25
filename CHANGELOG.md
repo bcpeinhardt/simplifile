@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## v2.2.1 - 25 March 2025
+- Remove use of deprecated field in JavaScript ffi
+
 ## v2.2.0 - 23 September 2024
 - Add `copy` function which can copy a file or a directory.
 - Deprecate `rename_file` and `rename_directory` in favor of `rename` which does both.
