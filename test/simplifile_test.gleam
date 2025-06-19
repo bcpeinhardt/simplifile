@@ -11,11 +11,11 @@ import simplifile.{
   Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale,
   Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read, Unknown, Write,
   append, append_bits, copy, copy_directory, copy_file, create_directory,
-  create_directory_all, create_file, create_symlink, delete, delete_all,
-  file_info, file_info_permissions, file_info_permissions_octal, file_info_type,
-  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
-  link_info, read, read_bits, read_directory, rename, set_permissions,
-  set_permissions_octal, write, write_bits,
+  create_directory_all, create_file, create_link, create_symlink, delete,
+  delete_all, file_info, file_info_permissions, file_info_permissions_octal,
+  file_info_type, file_permissions_to_octal, get_files, is_directory, is_file,
+  is_symlink, link_info, read, read_bits, read_directory, rename,
+  set_permissions, set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -96,6 +96,23 @@ pub fn make_symlink_test() {
     |> write(to: "./tmp/" <> the_target)
   let assert Ok(_) = delete(the_symlink)
   let assert Ok(_) = delete("./tmp/" <> the_target)
+}
+
+pub fn make_link_test() {
+  let the_target = "target_of_created_link"
+  let the_link = "./tmp/created_link"
+
+  let assert Ok(_) =
+    "some txt"
+    |> write(to: the_target)
+
+  let assert Ok(_) = create_link(the_target, the_link)
+  let assert Error(_) = create_link(the_target, the_link)
+
+  let assert Ok("some txt") = read(the_link)
+
+  let assert Ok(_) = delete(the_target)
+  let assert Ok(_) = delete(the_link)
 }
 
 pub fn read_directory_test() {

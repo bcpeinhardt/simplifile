@@ -12,6 +12,7 @@
     create_directory/1,
     create_dir_all/1,
     delete_file/1,
+    create_link/2,
     create_symlink/2,
     delete/1,
     delete_directory/1,
@@ -114,6 +115,10 @@ create_directory(Dir) ->
 %% Create a symbolic link New to the file or directory Existing (does not need to exist).
 create_symlink(Existing, New) ->
     posix_result(file:make_symlink(Existing, New)).
+
+%% Create a "hard link" New to the file or directory Existing.
+create_link(Existing, New) ->
+    posix_result(file:make_link(Existing, New)).
 
 %% List the contents of a directory
 read_directory(Dir) ->
