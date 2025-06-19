@@ -102,11 +102,15 @@ pub fn make_link_test() {
   let the_target = "target_of_created_link"
   let the_link = "./tmp/created_link"
 
+  // File does not exist yet
+  let assert Error(_) = create_link(the_target, the_link)
+
   let assert Ok(_) =
     "some txt"
     |> write(to: the_target)
 
   let assert Ok(_) = create_link(the_target, the_link)
+  // Link already exists
   let assert Error(_) = create_link(the_target, the_link)
 
   let assert Ok("some txt") = read(the_link)
