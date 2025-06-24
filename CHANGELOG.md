@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Add `link` function for hard-linking 
+- Add `create_link` function for hard-linking
 
 ## v2.2.1 - 25 March 2025
 - Remove use of deprecated field in JavaScript ffi
