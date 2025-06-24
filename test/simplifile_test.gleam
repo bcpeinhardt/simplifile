@@ -42,8 +42,15 @@ pub fn bits_test() {
   let assert Ok(_) =
     <<"Hello, World":utf8>>
     |> write_bits(to: filepath)
+  let assert Error(_) =
+    <<1:size(7)>>
+    |> write_bits(to: filepath)
+  let assert <<_:3, unaligned_text:bits>> = <<0:3, "Goodbye, Mars":utf8>>
   let assert Ok(_) =
-    <<"Goodbye, Mars":utf8>>
+    unaligned_text
+    |> append_bits(to: filepath)
+  let assert Error(_) =
+    <<1:size(7)>>
     |> append_bits(to: filepath)
   let assert Ok(hello_goodbye) = read_bits(from: filepath)
   hello_goodbye
