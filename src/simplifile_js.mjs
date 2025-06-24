@@ -111,6 +111,17 @@ export function createSymlink(target, path) {
 }
 
 /**
+ * Create the "hard link" called path pointing to the target
+ *
+ * @param {string} target
+ * @param {sting} path
+ * returns {ok | GError}
+ */
+export function createLink(target, path) {
+  return gleamResult(() => fs.linkSync(target, path));
+}
+
+/**
  * Create a directory at the given filepath
  *
  * @param {string} filepath

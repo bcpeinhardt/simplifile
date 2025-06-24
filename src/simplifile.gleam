@@ -432,6 +432,21 @@ pub fn create_symlink(
   from symlink: String,
 ) -> Result(Nil, FileError)
 
+/// Create a "hard link" called symlink pointing to target.
+/// This does not have the same relative pathing footgun as 
+/// `create_symlink`.
+/// 
+/// ## Example
+/// ```gleam
+/// create_link("../target", "./link")
+/// ```
+@external(erlang, "simplifile_erl", "create_link")
+@external(javascript, "./simplifile_js.mjs", "createLink")
+pub fn create_link(
+  to target: String,
+  from link: String,
+) -> Result(Nil, FileError)
+
 /// Lists the contents of a directory.
 /// The list contains directory and file names, and is not recursive.
 ///
