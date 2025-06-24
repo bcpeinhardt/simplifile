@@ -1,7 +1,10 @@
 # Changelog
 
 ## Unreleased
+
+## v2.3.0 - 24 June 2025
 - Add `create_link` function for hard-linking
+- Fix bug where one could silently write non-byte aligned data to file, now throws explicit error.
 
 ## v2.2.1 - 25 March 2025
 - Remove use of deprecated field in JavaScript ffi

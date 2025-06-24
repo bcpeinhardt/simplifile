@@ -6,6 +6,9 @@
 
 -module(simplifile_erl).
 
+% We call the 
+-compile({no_auto_import,[link/2]}).
+
 %% API
 -export([
     append_bits/2,
