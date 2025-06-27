@@ -33,7 +33,7 @@
 
 -include_lib("kernel/include/file.hrl").
 
-%% A macro for checking whether the error returned is one of the atoms for a posixe error.
+%% A macro for checking whether the error returned is one of the atoms for a posix error.
 -define(is_posix_error(Error),
         Error =:= eacces
         orelse Error =:= eagain
