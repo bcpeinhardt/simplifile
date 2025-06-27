@@ -159,50 +159,25 @@ rename_file(Source, Destination) ->
 set_permissions_octal(Filename, Permissions) ->
     posix_result(file:change_mode(Filename, Permissions)).
 
-is_directory(Path) ->
-    case file:read_file_info(Path) of
-        {ok, FileInfo} ->
-            case FileInfo#file_info.type of
-                directory ->
-                    {ok, true};
-                _ ->
-                    {ok, false}
-            end;
+% Helper function to check file type
+check_file_type(Path, TypeToCheck, ReadFunction) ->
+    case ReadFunction(Path) of
+        {ok, FileInfo} when is_record(FileInfo, file_info) ->
+            {ok, FileInfo#file_info.type =:= TypeToCheck};
         {error, enoent} ->
             {ok, false};
         {error, Reason} ->
             posix_result({error, Reason})
     end.
+
+is_directory(Path) ->
+    check_file_type(Path, directory, fun file:read_file_info/1).
 
 is_file(Path) ->
-    case file:read_file_info(Path) of
-        {ok, FileInfo} ->
-            case FileInfo#file_info.type of
-                regular ->
-                    {ok, true};
-                _ ->
-                    {ok, false}
-            end;
-        {error, enoent} ->
-            {ok, false};
-        {error, Reason} ->
-            posix_result({error, Reason})
-    end.
+    check_file_type(Path, regular, fun file:read_file_info/1).
 
 is_symlink(Path) ->
-    case file:read_link_info(Path) of
-        {ok, FileInfo} ->
-            case FileInfo#file_info.type of
-                symlink ->
-                    {ok, true};
-                _ ->
-                    {ok, false}
-            end;
-        {error, enoent} ->
-            {ok, false};
-        {error, Reason} ->
-            posix_result({error, Reason})
-    end.
+    check_file_type(Path, symlink, fun file:read_link_info/1).
 
     file_info_result(Result) ->
         case Result of
