@@ -1,3 +1,9 @@
+%%% --------------------------------------------------
+%%% @author Magd Aref
+%%% @doc Erlang header file defining simplifile's file_info
+%%% @end
+%%% --------------------------------------------------
+
 -ifndef(SIMPLIFILE_FILE_HRL_).
 
 -define(SIMPLIFILE_FILE_HRL_, 1).

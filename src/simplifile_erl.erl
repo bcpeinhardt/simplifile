@@ -32,6 +32,7 @@
 ]).
 
 -include_lib("kernel/include/file.hrl").
+-include_lib("simplifile_file_info.hrl").
 
 %% A macro for checking whether the error returned is one of the atoms for a posix error.
 -define(is_posix_error(Error),
@@ -203,38 +204,24 @@ is_symlink(Path) ->
             posix_result({error, Reason})
     end.
 
-file_info_result(Result) ->
-    case Result of
-        {ok,
-         {file_info,
-          Size,
-          _Type,
-          _Access,
-          Atime,
-          Mtime,
-          Ctime,
-          Mode,
-          Links,
-          MajorDevice,
-          _MinorDevice,
-          Inode,
-          Uid,
-          Gid}} ->
-            {ok,
-             {file_info,
-              Size,
-              Mode,
-              Links,
-              Inode,
-              Uid,
-              Gid,
-              MajorDevice,
-              Atime,
-              Mtime,
-              Ctime}};
-        {error, Reason} when ?is_posix_error(Reason) ->
-            Result
-    end.
+    file_info_result(Result) ->
+        case Result of
+            {ok, FileInfo} when is_record(FileInfo, file_info) ->
+                {ok, #simplifile_file_info{
+                    size = FileInfo#file_info.size,
+                    mode = FileInfo#file_info.mode,
+                    links = FileInfo#file_info.links,
+                    inode = FileInfo#file_info.inode,
+                    uid = FileInfo#file_info.uid,
+                    gid = FileInfo#file_info.gid,
+                    major_device = FileInfo#file_info.major_device,
+                    atime = FileInfo#file_info.atime,
+                    mtime = FileInfo#file_info.mtime,
+                    ctime = FileInfo#file_info.ctime
+                }};
+            {error, Reason} when ?is_posix_error(Reason) ->
+                {error, Reason}
+        end.
 
 file_info(Filename) ->
     file_info_result(file:read_file_info(Filename, [{time, posix}])).
