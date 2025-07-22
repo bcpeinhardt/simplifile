@@ -184,6 +184,15 @@ pub type FileInfo {
     /// File size in bytes.
     size: Int,
     /// File mode that indicates the file type and its permissions.
+    ///
+    /// This field enocodes file type and permissions in a 16 bit int in
+    /// the following order
+    /// - bits 15-12: File Type. e.g RegularFile, Symlink, Directory
+    /// - bits 11-9 : Special file permissions such as setUserId, setGroupId, and the Sticky-bit
+    /// - bits 8-6  : User read, write, and execute permisions.
+    /// - bits 5-3  : Group read, write, and execute permissions.
+    /// - bits 2-0  : Other read, write, and execute permissions.
+    ///
     /// For example, in Unix and Linux, a mode value of 33188 indicates
     /// a regular file and the permissions associated with it
     /// (read and write for the owner, and read-only for others, in
