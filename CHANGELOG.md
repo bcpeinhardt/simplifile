@@ -1,5 +1,7 @@
 # Changelog
 
+- Add documentation for 'mode' field in FileInfo.
+
 ## Unreleased
 
 ## v2.3.0 - 24 June 2025
