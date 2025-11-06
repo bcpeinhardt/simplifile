@@ -6,7 +6,6 @@
 
 -module(simplifile_erl).
 
-% We call the
 -compile({no_auto_import,[link/2]}).
 
 %% API
@@ -162,9 +161,9 @@ ensure_path(Path) ->
                 % It's a directory, so we're good
                 directory ->
                     {ok, nil};
-                % It's a file or some other weird "file", no good
+                % It's a file or some other weird "file", no good.
                 _ ->
-                    {error, eexist}
+                    {error, enotdir}
             end;
             
         % The entry does not already exist, so we need to make it
@@ -189,6 +188,8 @@ ensure_path(Path) ->
                     end
             end;
             
+        % This case actually does occur in the recursion. For example, when trying to ensure_path("wibble/wumbo/wombo"),
+        % if wumbo is a file and not a directory, the enotdir will come through this case.
         {error, Reason} ->
             {error, Reason}
     end.
