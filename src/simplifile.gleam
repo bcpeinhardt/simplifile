@@ -507,16 +507,7 @@ pub fn create_file(at filepath: String) -> Result(Nil, FileError) {
 /// `./a/b.txt`, a folder named `b.txt` will be created, so be sure
 /// to pass only the path to the required directory.
 pub fn create_directory_all(dirpath: String) -> Result(Nil, FileError) {
-  let is_abs = filepath.is_absolute(dirpath)
-  let path =
-    dirpath
-    |> filepath.split
-    |> list.fold("", filepath.join)
-  let path = case is_abs {
-    True -> "/" <> path
-    False -> path
-  }
-  do_create_dir_all(path <> "/")
+  do_create_dir_all(dirpath <> "/")
 }
 
 @external(erlang, "simplifile_erl", "create_dir_all")

@@ -6,7 +6,7 @@
 
 -module(simplifile_erl).
 
-% We call the 
+% We call the
 -compile({no_auto_import,[link/2]}).
 
 %% API
@@ -148,7 +148,50 @@ delete(Dir) ->
 
 %% Creates the entire path for a given directory to exist
 create_dir_all(Filename) ->
-    posix_result(filelib:ensure_dir(Filename)).
+    posix_result(ensure_path(Filename)).
+
+ensure_path("") -> {error, einval};
+ensure_path(".") -> {ok, nil};
+ensure_path("/") -> {ok, nil};
+
+ensure_path(Path) ->
+    case file:read_file_info(Path) of
+        % The entry already exists
+        {ok, FileInfo} ->
+            case FileInfo#file_info.type of
+                % It's a directory, so we're good
+                directory ->
+                    {ok, nil};
+                % It's a file or some other weird "file", no good
+                _ ->
+                    {error, eexist}
+            end;
+            
+        % The entry does not already exist, so we need to make it
+        {error, enoent} ->
+            case filename:dirname(Path) of
+                Parent when Parent =:= Path ->
+                    {error,einval};
+                Parent ->
+                    % Ensure the parent directory exists and then create the next segment.
+                    case ensure_path(Parent) of 
+                        {ok, nil} -> 
+                            case file:make_dir(Path) of 
+                               ok -> {ok, nil};
+                               % This is the handle the possible race condition that somebody else created
+                               % the directory in between the file info check and now.
+                               % If the directory exists, it's okay, because that's what we wanted anyway.
+                               {error, eexist} -> {ok, nil};
+                               {error, Reason} -> {error, Reason}
+                            end;
+                        {error, Reason} -> 
+                            {error, Reason}
+                    end
+            end;
+            
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 %% Move file from one path to another
 rename_file(Source, Destination) ->
