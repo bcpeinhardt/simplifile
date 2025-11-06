@@ -5,7 +5,6 @@
 ## Unreleased
 
 ## v2.3.1 - 6 November 2025 
-- Fix inconsistent error coming from `filelib:ensure_dir`.
 - Fix bug with error string typo for `Enotdir` on JS.
 
 ## v2.3.0 - 24 June 2025

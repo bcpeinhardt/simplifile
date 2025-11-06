@@ -754,22 +754,10 @@ pub fn rename_file_succeeds_at_renaming_a_directory_test() {
   read(new_dir <> "/i_am_a_file.txt") |> should.be_ok |> should.equal("Hello")
 }
 
-// This test passes but is commented out for now as it relies on an existing file on my machine.
-// TODO: Clean up this test to create the required file automatically.
-
-// pub fn inconsistent_errors_test() {
-//   // I have created a directory with sudo in tmp at /tmp/wibble
-//   let err = simplifile.create_directory("/tmp/wibble/wobble") |> should.be_error
-//   err |> should.equal(Eacces)
-
-//   let err =
-//     simplifile.create_directory_all("/tmp/wibble/wobble/wumbo")
-//     |> should.be_error
-//   [Eacces, Enoent] |> list.contains(err) |> should.be_true
-
-//   // Great, now let's fix the other issue
-//   simplifile.create_file("./tmp/wumbo") |> should.be_ok
-//   let err =
-//     simplifile.create_directory_all("./tmp/wumbo/wombo") |> should.be_error
-//   err |> should.equal(Enotdir)
-// }
+pub fn parse_errors_test() {
+  // Ensuring the ENOTDIR comes through correctly
+  simplifile.create_file("./tmp/wumbo") |> should.be_ok
+  let err =
+    simplifile.create_directory_all("./tmp/wumbo/wombo") |> should.be_error
+  err |> should.equal(Enotdir)
+}
