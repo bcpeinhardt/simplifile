@@ -765,7 +765,7 @@ pub fn rename_file_succeeds_at_renaming_a_directory_test() {
 //   let err =
 //     simplifile.create_directory_all("/tmp/wibble/wobble/wumbo")
 //     |> should.be_error
-//   err |> should.equal(Eacces)
+//   [Eacces, Enoent] |> list.contains(err) |> should.be_true
 
 //   // Great, now let's fix the other issue
 //   simplifile.create_file("./tmp/wumbo") |> should.be_ok
