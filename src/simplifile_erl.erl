@@ -6,7 +6,6 @@
 
 -module(simplifile_erl).
 
-% We call the 
 -compile({no_auto_import,[link/2]}).
 
 %% API
@@ -148,7 +147,7 @@ delete(Dir) ->
 
 %% Creates the entire path for a given directory to exist
 create_dir_all(Filename) ->
-    posix_result(filelib:ensure_dir(Filename)).
+    posix_result(filelib:ensure_path(Filename)).
 
 %% Move file from one path to another
 rename_file(Source, Destination) ->

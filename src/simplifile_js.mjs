@@ -136,7 +136,7 @@ export function createSymlink(target, path) {
  * Create the "hard link" called path pointing to the target
  *
  * @param {string} target
- * @param {sting} path
+ * @param {string} path
  * returns {ok | GError}
  */
 export function createLink(target, path) {
@@ -364,7 +364,7 @@ function cast_error(error_code) {
       return new $simplifile.Enosys();
     case "ENOBLK":
       return new $simplifile.Enotblk();
-    case "ENODIR":
+    case "ENOTDIR":
       return new $simplifile.Enotdir();
     case "ENOTSUP":
       return new $simplifile.Enotsup();
