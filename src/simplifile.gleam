@@ -334,6 +334,10 @@ pub fn write(
 @external(javascript, "./simplifile_js.mjs", "delete_")
 pub fn delete(file_or_dir_at path: String) -> Result(Nil, FileError)
 
+@external(erlang, "simplifile_erl", "delete_file")
+@external(javascript, "./simplifile_js.mjs", "delete_")
+pub fn delete_file(file at: String) -> Result(Nil, FileError)
+
 /// Delete all files/directories specified in a list of paths.
 /// Recursively deletes provided directories.
 /// Does not return an error if one or more of the provided paths

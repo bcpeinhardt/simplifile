@@ -13,11 +13,9 @@
     append_bits/2,
     create_directory/1,
     create_dir_all/1,
-    delete_file/1,
     create_link/2,
     create_symlink/2,
     delete/1,
-    delete_directory/1,
     file_info/1,
     link_info/1,
     is_directory/1,
@@ -96,25 +94,21 @@ posix_result(Result) ->
 
 %% Read the binary contents of a file
 read_bits(Filename) ->
-    posix_result(file:read_file(Filename)).
+    posix_result(file:read_file(Filename, [raw])).
 
 %% Write bytes to a file
 write_bits(Filename, Contents) ->
     case bit_size(Contents) rem 8 of
-        0 -> posix_result(file:write_file(Filename, Contents));
+        0 -> posix_result(file:write_file(Filename, Contents, [raw]));
         _ -> {error, einval}
     end.
 
 %% Append bytes to a file
 append_bits(Filename, Contents) ->
     case bit_size(Contents) rem 8 of
-        0 -> posix_result(file:write_file(Filename, Contents, [append]));
+        0 -> posix_result(file:write_file(Filename, Contents, [append, raw]));
         _ -> {error, einval}
     end.
-
-%% Delete the file at the given path
-delete_file(Filename) ->
-    posix_result(file:delete(Filename)).
 
 %% Create a directory at the given path. Missing parent directories are not created.
 create_directory(Dir) ->
@@ -137,10 +131,6 @@ read_directory(Dir) ->
             {error, Reason}
     end.
 
-%% Delete a directory at the given path. Directory must be empty.
-delete_directory(Dir) ->
-    posix_result(file:del_dir(Dir)).
-
 %% Deletes a file/directory and everything in it.
 delete(Dir) ->
     posix_result(file:del_dir_r(Dir)).
@@ -155,10 +145,10 @@ rename_file(Source, Destination) ->
 
 %% Set the permissions for the given file.
 set_permissions_octal(Filename, Permissions) ->
-    posix_result(file:change_mode(Filename, Permissions)).
+    posix_result(file:write_file_info(Filename, #file_info{mode=Permissions}, [raw])).
 
 is_directory(Path) ->
-    case file:read_file_info(Path) of
+    case file:read_file_info(Path, [{time, posix}, raw]) of
         {ok, FileInfo} ->
             case FileInfo#file_info.type of
                 directory ->
@@ -173,7 +163,7 @@ is_directory(Path) ->
     end.
 
 is_file(Path) ->
-    case file:read_file_info(Path) of
+    case file:read_file_info(Path, [{time, posix}, raw]) of
         {ok, FileInfo} ->
             case FileInfo#file_info.type of
                 regular ->
@@ -188,7 +178,7 @@ is_file(Path) ->
     end.
 
 is_symlink(Path) ->
-    case file:read_link_info(Path) of
+    case file:read_link_info(Path, [{time, posix}, raw]) of
         {ok, FileInfo} ->
             case FileInfo#file_info.type of
                 symlink ->
@@ -236,7 +226,7 @@ file_info_result(Result) ->
     end.
 
 file_info(Filename) ->
-    file_info_result(file:read_file_info(Filename, [{time, posix}])).
+    file_info_result(file:read_file_info(Filename, [{time, posix}, raw])).
 
 link_info(Filename) ->
-    file_info_result(file:read_link_info(Filename, [{time, posix}])).
+    file_info_result(file:read_link_info(Filename, [{time, posix}, raw])).
