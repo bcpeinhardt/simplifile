@@ -324,6 +324,8 @@ function cast_error(error_code) {
       return new $simplifile.Eftype();
     case "EINTR":
       return new $simplifile.Eintr();
+    case "EHOSTDOWN":
+      return new $simplifile.Ehostdown();
     case "EINVAL":
       return new $simplifile.Einval();
     case "EIO":

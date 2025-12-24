@@ -39,6 +39,8 @@ pub type FileError {
   /// Inappropriate file type or format. Usually caused by trying to set the
   /// "sticky bit" on a regular file (not a directory).
   Eftype
+  /// Host is down.
+  Ehostdown
   /// Interrupted system call.
   Eintr
   /// Invalid argument.
@@ -170,6 +172,7 @@ pub fn describe_error(error: FileError) -> String {
     Enosr -> "No STREAM resources"
     Enostr -> "Not a STREAM"
     Eopnotsupp -> "Operation not supported on socket"
+    Ehostdown -> "Host is down"
     NotUtf8 -> "File not UTF-8 encoded"
     Unknown(inner) -> "Unknown error: " <> inner
   }

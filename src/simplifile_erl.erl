@@ -46,6 +46,7 @@
         orelse Error =:= efault
         orelse Error =:= efbig
         orelse Error =:= eftype
+        orelse Error =:= ehostdown
         orelse Error =:= eintr
         orelse Error =:= einval
         orelse Error =:= eio

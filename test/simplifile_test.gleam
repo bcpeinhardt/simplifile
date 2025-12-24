@@ -5,7 +5,7 @@ import gleeunit
 import gleeunit/should
 import simplifile.{
   Directory, Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk, Edeadlock, Edquot,
-  Eexist, Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop, Emfile, Emlink,
+  Eexist, Efault, Efbig, Eftype, Ehostdown, Einval, Eio, Eisdir, Eloop, Emfile, Emlink,
   Emultihop, Enametoolong, Enfile, Enobufs, Enodev, Enoent, Enolck, Enolink,
   Enomem, Enospc, Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio,
   Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale,
@@ -691,6 +691,8 @@ pub fn describe_error_test() {
 
   let assert "Operation not supported on socket" =
     simplifile.describe_error(Eopnotsupp)
+
+  let assert "Host is down" = simplifile.describe_error(Ehostdown)
 
   let assert "File not UTF-8 encoded" = simplifile.describe_error(NotUtf8)
 

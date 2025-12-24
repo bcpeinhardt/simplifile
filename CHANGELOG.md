@@ -3,6 +3,7 @@
 - Add documentation for 'mode' field in FileInfo.
 
 ## Unreleased
+- Add support for POSIX error `Ehostdown`.
 
 ## v2.3.1 - 6 November 2025 
 - Fix bug with error string typo for `Enotdir` on JS.
