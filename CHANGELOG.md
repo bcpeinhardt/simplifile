@@ -4,6 +4,7 @@
 
 ## Unreleased
 - Add support for POSIX error `Ehostdown`.
+- Fix bug where unknown errrs were not handled in Erlang ffi.
 
 ## v2.3.1 - 6 November 2025 
 - Fix bug with error string typo for `Enotdir` on JS.
