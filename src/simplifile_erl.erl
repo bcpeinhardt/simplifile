@@ -92,8 +92,13 @@ posix_result(Result) ->
         {ok, Value} ->
             {ok, Value};
         {error, Reason} when ?is_posix_error(Reason) ->
-            {error, Reason}
+            {error, Reason};
+        {error, Reason} ->
+            {error, {unknown, error_reason_to_binary(Reason)}}
     end.
+
+error_reason_to_binary(Reason) ->
+	unicode:characters_to_binary(io_lib:format("~tp", [Reason])).
 
 %% Read the binary contents of a file
 read_bits(Filename) ->
