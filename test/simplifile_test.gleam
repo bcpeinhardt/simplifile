@@ -772,7 +772,6 @@ pub fn unknown_errors_return_unknown_test() {
 
   let assert Error(unknown) = err
   let assert Unknown(inner) = unknown
-  echo inner
   inner |> should.not_equal("")
   inner |> string.uppercase |> should.equal(inner)
   // confirm the string has been uppercased
