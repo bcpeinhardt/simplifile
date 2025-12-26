@@ -46,7 +46,6 @@
         orelse Error =:= efault
         orelse Error =:= efbig
         orelse Error =:= eftype
-        orelse Error =:= ehostdown
         orelse Error =:= eintr
         orelse Error =:= einval
         orelse Error =:= eio
@@ -94,11 +93,8 @@ posix_result(Result) ->
         {error, Reason} when ?is_posix_error(Reason) ->
             {error, Reason};
         {error, Reason} ->
-            {error, {unknown, error_reason_to_binary(Reason)}}
+            {error, {unknown, string:uppercase(atom_to_binary(Reason))}}
     end.
-
-error_reason_to_binary(Reason) ->
-	unicode:characters_to_binary(io_lib:format("~tp", [Reason])).
 
 %% Read the binary contents of a file
 read_bits(Filename) ->

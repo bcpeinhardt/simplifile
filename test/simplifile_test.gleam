@@ -1,22 +1,22 @@
 import gleam/int
 import gleam/list
 import gleam/set
-import gleam/string
 import gleeunit
 import gleeunit/should
-import simplifile.{type FileError,
-  Directory, Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk, Edeadlock, Edquot,
-  Eexist, Efault, Efbig, Eftype, Ehostdown, Einval, Eio, Eisdir, Eloop, Emfile,
-  Emlink, Emultihop, Enametoolong, Enfile, Enobufs, Enodev, Enoent, Enolck,
-  Enolink, Enomem, Enospc, Enosr, Enostr, Enosys, Enotblk, Enotdir, Enotsup, Enxio,
-  Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe, Esrch, Estale,
-  Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read,
+import simplifile.{
+  type FileError, Directory, Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk,
+  Edeadlock, Edquot, Eexist, Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop,
+  Emfile, Emlink, Emultihop, Enametoolong, Enfile, Enobufs, Enodev, Enoent,
+  Enolck, Enolink, Enomem, Enospc, Enosr, Enostr, Enosys, Enotblk, Enotdir,
+  Enotsup, Enxio, Eopnotsupp, Eoverflow, Eperm, Epipe, Erange, Erofs, Espipe,
+  Esrch, Estale, Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read,
   Unknown, Write, append, append_bits, copy, copy_directory, copy_file,
-  create_directory, create_directory_all, create_file, create_link, create_symlink,
-  delete, delete_all, file_info, file_info_permissions, file_info_permissions_octal,
-  file_info_type, file_permissions_to_octal, get_files, is_directory, is_file,
-  is_symlink, link_info, read, read_bits, read_directory, rename,
-  set_permissions, set_permissions_octal, write, write_bits,
+  create_directory, create_directory_all, create_file, create_link,
+  create_symlink, delete, delete_all, file_info, file_info_permissions,
+  file_info_permissions_octal, file_info_type, file_permissions_to_octal,
+  get_files, is_directory, is_file, is_symlink, link_info, read, read_bits,
+  read_directory, rename, set_permissions, set_permissions_octal, write,
+  write_bits,
 }
 
 pub fn main() {
@@ -484,9 +484,7 @@ pub fn file_info_get_permissions_test() {
 pub fn get_files_with_slash_test() {
   let assert Ok(files) = get_files(in: "./test/")
   files
-  |> list.sort(string.compare)
   |> should.equal([
-    "./test/create_directory_bad_arg.mjs",
     "./test/simplifile_test.gleam",
   ])
 }
@@ -697,8 +695,6 @@ pub fn describe_error_test() {
   let assert "Operation not supported on socket" =
     simplifile.describe_error(Eopnotsupp)
 
-  let assert "Host is down" = simplifile.describe_error(Ehostdown)
-
   let assert "File not UTF-8 encoded" = simplifile.describe_error(NotUtf8)
 
   let assert "Unknown error: Something went wrong" =
@@ -770,15 +766,16 @@ pub fn parse_errors_test() {
 }
 
 pub fn unknown_errors_return_unknown_test() {
-	let err = create_directory_with_bad_arg(#(Nil, Nil))
+  let err = create_directory_with_bad_arg(#(Nil, Nil))
   err |> should.be_error
 
   let assert Error(unknown) = err
   let assert Unknown(inner) = unknown
-	inner |> should.not_equal("")
+  echo inner
+  inner |> should.not_equal("")
 }
 
 // This is necessary to force unknown error generation uniformly across runtimes
 @external(erlang, "simplifile_erl", "create_directory")
-@external(javascript, "./create_directory_bad_arg.mjs", "createDirectoryWithBadArg")
+@external(javascript, "./simplifile_js.mjs", "createDirectory")
 fn create_directory_with_bad_arg(arg: #(Nil, Nil)) -> Result(Nil, FileError)
