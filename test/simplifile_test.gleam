@@ -1,6 +1,7 @@
 import gleam/int
 import gleam/list
 import gleam/set
+import gleam/string
 import gleeunit
 import gleeunit/should
 import simplifile.{
@@ -773,6 +774,8 @@ pub fn unknown_errors_return_unknown_test() {
   let assert Unknown(inner) = unknown
   echo inner
   inner |> should.not_equal("")
+  inner |> string.uppercase |> should.equal(inner)
+  // confirm the string has been uppercased
 }
 
 // This is necessary to force unknown error generation uniformly across runtimes
