@@ -91,7 +91,9 @@ posix_result(Result) ->
         {ok, Value} ->
             {ok, Value};
         {error, Reason} when ?is_posix_error(Reason) ->
-            {error, Reason}
+            {error, Reason};
+        {error, Reason} ->
+            {error, {unknown, string:uppercase(atom_to_binary(Reason))}}
     end.
 
 %% Read the binary contents of a file

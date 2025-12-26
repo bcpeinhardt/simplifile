@@ -1,8 +1,9 @@
 # Changelog
 
-- Add documentation for 'mode' field in FileInfo.
-
 ## Unreleased
+
+## v2.3.2 - 26 December 2025 
+- Fix bug where unknown errors were not properly converted to the Unknown variant in Erlang ffi.
 
 ## v2.3.1 - 6 November 2025 
 - Fix bug with error string typo for `Enotdir` on JS.
