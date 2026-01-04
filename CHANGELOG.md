@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Expand README example and add selected functions table.
 
 ## v2.3.2 - 26 December 2025 
 - Fix bug where unknown errors were not properly converted to the Unknown variant in Erlang ffi.
