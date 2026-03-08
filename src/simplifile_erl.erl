@@ -103,20 +103,20 @@ read_bits(Filename) ->
 %% Write bytes to a file
 write_bits(Filename, Contents) ->
     case bit_size(Contents) rem 8 of
-        0 -> posix_result(file:write_file(Filename, Contents));
+        0 -> posix_result(file:write_file(Filename, Contents, [raw]));
         _ -> {error, einval}
     end.
 
 %% Append bytes to a file
 append_bits(Filename, Contents) ->
     case bit_size(Contents) rem 8 of
-        0 -> posix_result(file:write_file(Filename, Contents, [append]));
+        0 -> posix_result(file:write_file(Filename, Contents, [append, raw]));
         _ -> {error, einval}
     end.
 
 %% Delete the file at the given path
 delete_file(Filename) ->
-    posix_result(file:delete(Filename)).
+    posix_result(file:delete(Filename, [raw])).
 
 %% Create a directory at the given path. Missing parent directories are not created.
 create_directory(Dir) ->

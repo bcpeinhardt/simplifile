@@ -183,6 +183,18 @@ export function delete_(fileOrDirPath) {
 }
 
 /**
+ * Specifically delete a single file.
+ * 
+ * @param {string} filePath 
+ * @returns {Ok | GError}
+ */
+export function deleteFile(filePath) {
+  return gleamResult(() => {
+    fs.unlinkSync(path.normalize(filePath));
+  })
+}
+
+/**
  * List the contents of a directory.
  *
  * @param {string} filepath

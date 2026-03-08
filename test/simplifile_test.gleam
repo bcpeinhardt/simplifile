@@ -13,11 +13,11 @@ import simplifile.{
   Esrch, Estale, Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read,
   Unknown, Write, append, append_bits, copy, copy_directory, copy_file,
   create_directory, create_directory_all, create_file, create_link,
-  create_symlink, delete, delete_all, file_info, file_info_permissions,
-  file_info_permissions_octal, file_info_type, file_permissions_to_octal,
-  get_files, is_directory, is_file, is_symlink, link_info, read, read_bits,
-  read_directory, rename, set_permissions, set_permissions_octal, write,
-  write_bits,
+  create_symlink, delete, delete_all, delete_file, file_info,
+  file_info_permissions, file_info_permissions_octal, file_info_type,
+  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
+  link_info, read, read_bits, read_directory, rename, set_permissions,
+  set_permissions_octal, write, write_bits,
 }
 
 pub fn main() {
@@ -354,6 +354,31 @@ pub fn delete_test() {
   let assert Ok(False) = is_symlink(the_symlink)
   let assert Ok(True) = is_file("./tmp/" <> the_target)
   let assert Ok(_) = delete(file_or_dir_at: "./tmp/" <> the_target)
+  let assert Ok(False) = is_file("./tmp/" <> the_target)
+}
+
+pub fn delete_file_test() {
+  // Basic delete
+  let assert Ok(_) = write("Hello", to: "./tmp/existing_file_2.txt")
+  let assert Ok(_) = delete_file("./tmp/existing_file_2.txt")
+  let assert Error(Enoent) = read("./tmp/existing_file_2.txt")
+
+  // Deleting a file that doesn't exist throws an error
+  let assert Error(Enoent) = delete_file("./idontexist")
+
+  // Delete a symlink doesn't delete the target
+  let the_target = "target_of_created_symlink_2"
+  let the_symlink = "./tmp/created_symlink_2"
+  let assert Ok(_) =
+    ""
+    |> write(to: "./tmp/" <> the_target)
+  let assert Ok(_) = create_symlink(the_target, the_symlink)
+  let assert Ok(True) = is_file("./tmp/" <> the_target)
+  let assert Ok(True) = is_symlink(the_symlink)
+  let assert Ok(_) = delete_file(the_symlink)
+  let assert Ok(False) = is_symlink(the_symlink)
+  let assert Ok(True) = is_file("./tmp/" <> the_target)
+  let assert Ok(_) = delete_file(at: "./tmp/" <> the_target)
   let assert Ok(False) = is_file("./tmp/" <> the_target)
 }
 
