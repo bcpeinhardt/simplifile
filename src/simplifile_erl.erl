@@ -32,7 +32,7 @@
 
 -include_lib("kernel/include/file.hrl").
 
-%% A macro for checking whether the error returned is one of the atoms for a posixe error.
+%% A macro for checking whether the error returned is one of the atoms for a posix error.
 -define(is_posix_error(Error),
         Error =:= eacces
         orelse Error =:= eagain
@@ -204,38 +204,26 @@ is_symlink(Path) ->
             posix_result({error, Reason})
     end.
 
-file_info_result(Result) ->
-    case Result of
-        {ok,
-         {file_info,
-          Size,
-          _Type,
-          _Access,
-          Atime,
-          Mtime,
-          Ctime,
-          Mode,
-          Links,
-          MajorDevice,
-          _MinorDevice,
-          Inode,
-          Uid,
-          Gid}} ->
-            {ok,
-             {file_info,
-              Size,
-              Mode,
-              Links,
-              Inode,
-              Uid,
-              Gid,
-              MajorDevice,
-              Atime,
-              Mtime,
-              Ctime}};
-        {error, Reason} when ?is_posix_error(Reason) ->
-            Result
-    end.
+    %% For information on the file_info record refer to
+    %% https://www.erlang.org/doc/apps/kernel/file.html#t:file_info/0
+    file_info_result(Result) ->
+        case Result of
+            {ok, FileInfo} when is_record(FileInfo, file_info) ->
+                {ok, {file_info, 
+                    FileInfo#file_info.size,
+                    FileInfo#file_info.mode,
+                    FileInfo#file_info.links,
+                    FileInfo#file_info.inode,
+                    FileInfo#file_info.uid,
+                    FileInfo#file_info.gid,
+                    FileInfo#file_info.major_device,
+                    FileInfo#file_info.atime,
+                    FileInfo#file_info.mtime,
+                    FileInfo#file_info.ctime
+                }};
+            {error, Reason} when ?is_posix_error(Reason) ->
+                {error, Reason}
+        end.
 
 file_info(Filename) ->
     file_info_result(file:read_file_info(Filename, [{time, posix}])).
