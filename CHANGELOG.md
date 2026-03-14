@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Add `resolve` function, which resolves relative paths to absolute paths based on the current working directory.
 
 ## v2.4.0 - 7 March 2026
 - Use `raw` option for write and append operations on Erlang

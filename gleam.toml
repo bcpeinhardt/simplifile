@@ -4,7 +4,7 @@ description = "Basic file operations that work on all targets"
 
 licences = ["Apache-2.0"]
 repository = { type = "github", user = "bcpeinhardt", repo = "simplifile" }
-gleam = ">= 1.9.0"
+gleam = ">= 1.11.0"
 # links = [{ title = "Website", href = "https://gleam.run" }]
 
 [javascript.deno]

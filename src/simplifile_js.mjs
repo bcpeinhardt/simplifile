@@ -410,3 +410,13 @@ function cast_error(error_code) {
       return new $simplifile.Unknown(error_code);
   }
 }
+
+/**
+ * Resolves a relative path to an absolute path based on the current working directory.
+ * 
+ * @param {string} filepath The file path to resolve
+ * @returns {string} The resolved file path
+ */
+export function resolve(filepath) {
+  return path.resolve(filepath);
+} 
