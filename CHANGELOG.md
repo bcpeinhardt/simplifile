@@ -1,6 +1,10 @@
 # Changelog
 
 ## Unreleased
+
+--
+
+## v2.5.0 - 27 June 2026
 - Add `resolve` function, which resolves relative paths to absolute paths based on the current working directory.
 
 ## v2.4.0 - 7 March 2026
