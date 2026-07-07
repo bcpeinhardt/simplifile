@@ -3,7 +3,6 @@ import gleam/list
 import gleam/set
 import gleam/string
 import gleeunit
-import gleeunit/should
 import simplifile.{
   type FileError, Directory, Eacces, Eagain, Ebadf, Ebadmsg, Ebusy, Edeadlk,
   Edeadlock, Edquot, Eexist, Efault, Efbig, Eftype, Einval, Eio, Eisdir, Eloop,
@@ -55,8 +54,7 @@ pub fn bits_test() {
     <<1:size(7)>>
     |> append_bits(to: filepath)
   let assert Ok(hello_goodbye) = read_bits(from: filepath)
-  hello_goodbye
-  |> should.equal(<<"Hello, WorldGoodbye, Mars":utf8>>)
+  assert hello_goodbye == <<"Hello, WorldGoodbye, Mars":utf8>>
   let assert Ok(_) = delete(filepath)
   let assert Error(_) = read_bits(from: filepath)
 }
@@ -65,8 +63,7 @@ pub fn enoent_test() {
   // ENOENT
   let filepath = "./tmp/does_not_exist.txt"
   let assert Error(e) = read(from: filepath)
-  e
-  |> should.equal(Enoent)
+  assert e == Enoent
 }
 
 pub fn path_test() {
@@ -424,25 +421,19 @@ pub fn files_test() {
   let assert Ok(Nil) = create_file("./tmp/1/2/3/4/5/test.txt")
 
   let assert Ok(files) = get_files(in: "./tmp/1")
-  list.length(files)
-  |> should.equal(6)
-  files
-  |> set.from_list
-  |> should.equal(
-    set.from_list([
+  assert list.length(files) == 6
+  assert files |> set.from_list
+    == set.from_list([
       "./tmp/1/test.txt", "./tmp/1/2/test.txt", "./tmp/1/2/3/test2.txt",
       "./tmp/1/2/3/test.txt", "./tmp/1/2/3/4/test.txt",
       "./tmp/1/2/3/4/5/test.txt",
-    ]),
-  )
+    ])
 }
 
 pub fn octal_math_test() {
   let all = set.from_list([Read, Write, Execute])
   let all = FilePermissions(user: all, group: all, other: all)
-  all
-  |> file_permissions_to_octal
-  |> should.equal(0o00777)
+  all |> file_permissions_to_octal == 0o00777
 }
 
 pub fn permissions_test() {
@@ -488,37 +479,31 @@ pub fn file_info_get_permissions_test() {
   let assert Ok(Nil) = set_permissions(filepath, all)
   let assert Ok(info) = file_info(filepath)
 
-  file_info_permissions(info)
-  |> should.equal(all)
+  assert file_info_permissions(info) == all
 
-  file_info_permissions_octal(info)
-  |> should.equal(0o777)
+  assert file_info_permissions_octal(info) == 0o777
 
   let assert Ok(Nil) = set_permissions_octal(filepath, 0o625)
   let assert Ok(info) = file_info(filepath)
 
-  file_info_permissions(info)
-  |> should.equal(FilePermissions(
-    user: set.from_list([Read, Write]),
-    group: set.from_list([Write]),
-    other: set.from_list([Read, Execute]),
-  ))
+  assert file_info_permissions(info)
+    == FilePermissions(
+      user: set.from_list([Read, Write]),
+      group: set.from_list([Write]),
+      other: set.from_list([Read, Execute]),
+    )
 
   let assert Ok(Nil) = delete("./tmp/permissions")
 }
 
 pub fn get_files_with_slash_test() {
   let assert Ok(files) = get_files(in: "./test/")
-  files
-  |> should.equal([
-    "./test/simplifile_test.gleam",
-  ])
+  assert files == ["./test/simplifile_test.gleam"]
 }
 
 // This test is only for local development
 // pub fn current_directory_test() {
-//   Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile")
-//   |> should.equal(current_directory())
+//   assert Ok("/Users/benjaminpeinhardt/Development/Projects/simplifile") == current_directory()
 // }
 
 pub fn verify_is_file_and_is_dir_test() {
@@ -564,21 +549,17 @@ pub fn file_info_type_test() {
   let filepath = "./tmp/file_info_type_test.txt"
   let assert Ok(_) = write(to: filepath, contents: "")
   let assert Ok(info) = file_info(filepath)
-  file_info_type(info)
-  |> should.equal(File)
+  assert file_info_type(info) == File
 
   let assert Ok(info) = file_info("./tmp")
-  file_info_type(info)
-  |> should.equal(Directory)
+  assert file_info_type(info) == Directory
 
   let linkpath = "./tmp/file_info_type_symlink"
   let assert Ok(_) = create_symlink("file_info_type_test.txt", linkpath)
   let assert Ok(info) = file_info(linkpath)
-  file_info_type(info)
-  |> should.equal(File)
+  assert file_info_type(info) == File
   // let assert Ok(info) = link_info(linkpath)
-  // file_info_type(info)
-  // |> should.equal(Symlink)
+  // assert file_info_type(info) == Symlink
 }
 
 pub fn link_info_test() {
@@ -592,14 +573,11 @@ pub fn link_info_test() {
   let assert Ok(lstat) = link_info(symlink_path)
   let assert Ok(stat) = file_info(symlink_path)
 
-  stat
-  |> should.not_equal(lstat)
+  assert stat != lstat
 
-  stat.size
-  |> should.equal(6)
+  assert stat.size == 6
 
-  lstat.size
-  |> should.not_equal(6)
+  assert lstat.size != 6
 }
 
 pub fn clear_directory_test() {
@@ -609,8 +587,7 @@ pub fn clear_directory_test() {
   let assert Ok(_) = create_file("./tmp/clear_dir/nested_dir/test.txt")
 
   let assert Ok(_) = simplifile.clear_directory("./tmp/clear_dir")
-  is_directory("./tmp/clear_dir")
-  |> should.equal(Ok(True))
+  assert is_directory("./tmp/clear_dir") == Ok(True)
   let assert Ok([]) = read_directory("./tmp/clear_dir")
   let assert Ok(_) = delete("./tmp/clear_dir")
 }
@@ -734,7 +711,7 @@ pub fn file_info_follows_simlinks_recursively_test() {
     create_symlink(from: "./tmp/layer_2.txt", to: "./layer_1.txt")
 
   let assert Ok(fi) = file_info("./tmp/layer_2.txt")
-  fi |> file_info_type |> should.equal(File)
+  assert fi |> file_info_type == File
 
   let assert Ok(_) = create_directory("./tmp/base_dir")
   let assert Ok(_) = create_symlink(from: "./tmp/layer_1_dir", to: "./base_dir")
@@ -742,7 +719,7 @@ pub fn file_info_follows_simlinks_recursively_test() {
     create_symlink(from: "./tmp/layer_2_dir", to: "./layer_1_dir")
 
   let assert Ok(fi) = file_info("./tmp/layer_2_dir")
-  fi |> file_info_type |> should.equal(Directory)
+  assert fi |> file_info_type == Directory
 }
 
 pub fn copy_can_copy_whatever_test() {
@@ -779,27 +756,28 @@ pub fn rename_file_succeeds_at_renaming_a_directory_test() {
   let assert Ok(_) = rename(at: dir, to: new_dir)
 
   let assert Ok(fi) = file_info(new_dir)
-  fi |> file_info_type |> should.equal(Directory)
-  read(new_dir <> "/i_am_a_file.txt") |> should.be_ok |> should.equal("Hello")
+  assert fi |> file_info_type == Directory
+  let assert Ok(di) = read(new_dir <> "/i_am_a_file.txt")
+  assert di == "Hello"
 }
 
 pub fn parse_errors_test() {
   // Ensuring the ENOTDIR comes through correctly
-  simplifile.create_file("./tmp/wumbo") |> should.be_ok
-  let err =
-    simplifile.create_directory_all("./tmp/wumbo/wombo") |> should.be_error
-  err |> should.equal(Enotdir)
+  let assert Ok(_) = simplifile.create_file("./tmp/wumbo")
+  let assert Error(e) = simplifile.create_directory_all("./tmp/wumbo/wombo")
+  assert e == Enotdir
 }
 
 pub fn unknown_errors_return_unknown_test() {
   let err = create_directory_with_bad_arg(#(Nil, Nil))
-  err |> should.be_error
 
   let assert Error(unknown) = err
+
   let assert Unknown(inner) = unknown
-  inner |> should.not_equal("")
-  inner |> string.uppercase |> should.equal(inner)
-  // confirm the string has been uppercased
+
+  assert inner != ""
+
+  assert string.uppercase(inner) == inner
 }
 
 // This is necessary to force unknown error generation uniformly across runtimes
