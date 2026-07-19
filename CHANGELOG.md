@@ -4,6 +4,9 @@
 
 --
 
+## v2.6.0 - 18 July 2026
+- Add `touch` function, which creates a file if it doesn't exist and updates its access and modification times to now if it does.
+
 ## v2.5.0 - 27 June 2026
 - Add `resolve` function, which resolves relative paths to absolute paths based on the current working directory.
 
