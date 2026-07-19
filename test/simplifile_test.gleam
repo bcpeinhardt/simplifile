@@ -16,7 +16,7 @@ import simplifile.{
   file_info_permissions, file_info_permissions_octal, file_info_type,
   file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
   link_info, read, read_bits, read_directory, rename, set_permissions,
-  set_permissions_octal, write, write_bits,
+  set_permissions_octal, touch, write, write_bits,
 }
 
 pub fn main() {
@@ -803,4 +803,63 @@ pub fn resolve_absolute_path_test() {
   let assert Ok(actual) = simplifile.resolve(initial)
 
   assert initial == actual
+}
+
+pub fn touch_creates_new_file_test() {
+  let filepath = "./tmp/touch_new_file.txt"
+
+  // Ensure file doesn't exist
+  let assert Ok(False) = is_file(filepath)
+
+  // Touch should create the file
+  let assert Ok(Nil) = touch(filepath)
+
+  // File should now exist and be empty
+  let assert Ok(True) = is_file(filepath)
+  let assert Ok("") = read(filepath)
+
+  // Cleanup
+  let assert Ok(_) = delete(filepath)
+}
+
+pub fn touch_updates_existing_file_times_test() {
+  let filepath = "./tmp/touch_existing_file.txt"
+
+  // Get the mtime of README (which was modified in the past)
+  let assert Ok(readme_info) = file_info("./README.md")
+
+  // Create a file with old content
+  let assert Ok(Nil) = write("Hello", to: filepath)
+
+  // Touch the file
+  let assert Ok(Nil) = touch(filepath)
+
+  // Get updated file info
+  let assert Ok(info_after) = file_info(filepath)
+
+  // Times should be > README's time (since touch sets to now)
+  assert info_after.atime_seconds > readme_info.atime_seconds
+  assert info_after.mtime_seconds > readme_info.mtime_seconds
+
+  // Contents should be unchanged
+  let assert Ok("Hello") = read(filepath)
+
+  // Cleanup
+  let assert Ok(_) = delete(filepath)
+}
+
+pub fn touch_directory_test() {
+  let dirpath = "./tmp/touch_dir"
+
+  // Create directory
+  let assert Ok(Nil) = create_directory(dirpath)
+
+  // Touch the directory
+  let assert Ok(Nil) = touch(dirpath)
+
+  // Directory should still exist
+  let assert Ok(True) = is_directory(dirpath)
+
+  // Cleanup
+  let assert Ok(_) = delete(dirpath)
 }

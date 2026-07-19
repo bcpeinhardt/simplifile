@@ -413,10 +413,35 @@ function cast_error(error_code) {
 
 /**
  * Resolves a relative path to an absolute path based on the current working directory.
- * 
+ *
  * @param {string} filepath The file path to resolve
  * @returns {string} The resolved file path
  */
 export function resolve(filepath) {
   return path.resolve(filepath);
+}
+
+/**
+ * Mimics the unix touch command: creates a file if it doesn't exist,
+ * and updates the access and modification times to now.
+ *
+ * @param {string} filepath
+ * @returns {Ok | GError}
+ */
+export function touch(filepath) {
+  return gleamResult(() => {
+    const normalizedPath = path.normalize(filepath);
+    const now = new Date();
+    try {
+      // Try to update times (file exists)
+      fs.utimesSync(normalizedPath, now, now);
+    } catch (e) {
+      if (e.code === "ENOENT") {
+        // File doesn't exist, create it (times are set to now automatically)
+        fs.writeFileSync(normalizedPath, "");
+      } else {
+        throw e;
+      }
+    }
+  });
 } 

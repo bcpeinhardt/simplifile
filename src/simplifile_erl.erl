@@ -27,7 +27,8 @@
     read_directory/1,
     rename_file/2,
     set_permissions_octal/2,
-    write_bits/2
+    write_bits/2,
+    touch/1
 ]).
 
 -include_lib("kernel/include/file.hrl").
@@ -230,3 +231,18 @@ file_info(Filename) ->
 
 link_info(Filename) ->
     file_info_result(file:read_link_info(Filename, [{time, posix}])).
+
+%% Mimics the unix touch command: creates a file if it doesn't exist,
+%% and updates the access and modification times to now.
+touch(Filename) ->
+    Now = erlang:universaltime(),
+    case file:read_file_info(Filename) of
+        {ok, _} ->
+            %% File exists, update times
+            posix_result(file:change_time(Filename, Now, Now));
+        {error, enoent} ->
+            %% File doesn't exist, create it (times are set to now automatically)
+            posix_result(file:write_file(Filename, <<>>, [raw]));
+        {error, Reason} ->
+            posix_result({error, Reason})
+    end.

@@ -776,3 +776,14 @@ pub fn resolve(path path: String) -> Result(String, FileError) {
 @external(erlang, "filename", "absname")
 @external(javascript, "./simplifile_js.mjs", "resolve")
 fn do_resolve(path: String) -> String
+
+/// Mimics the `touch` command, creating a file if it doesn't exist, and
+/// updating its access and modification times to the current time if it does.
+///
+/// ## Example
+/// ```gleam
+/// let assert Ok(Nil) = touch("./new_or_existing_file.txt")
+/// ```
+@external(erlang, "simplifile_erl", "touch")
+@external(javascript, "./simplifile_js.mjs", "touch")
+pub fn touch(at path: String) -> Result(Nil, FileError)
