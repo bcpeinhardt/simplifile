@@ -28,14 +28,32 @@ The `verify_is_file`, `verify_is_directory`, and `verify_is_symlink` have had th
 The `Unknown` variant of `FileError` now has an inner `String`.
 
 ## Example
+
 ```gleam
-let filepath = "./test/hello.txt"
-let assert Ok(_) = "Hello, World" |> write(to: filepath)
-let assert Ok(_) = "Goodbye, Mars" |> append(to: filepath)
-let assert Ok("Hello, WorldGoodbye, Mars") = read(from: filepath)
-let assert Ok(_) = delete(filepath)
-let assert Error(_) = read(from: filepath)
+import simplifile.{read, write, append, delete}
+
+pub fn main() {
+  let filepath = "./test/hello.txt"
+  let assert Ok(_) = "Hello, World" |> write(to: filepath)
+  let assert Ok(_) = "Goodbye, Mars" |> append(to: filepath)
+  let assert Ok("Hello, WorldGoodbye, Mars") = read(from: filepath)
+  let assert Ok(_) = delete(filepath)
+  let assert Error(_) = read(from: filepath)
+}
 ```
+
+## Selected Functions
+
+| Function | Description |
+| --- | --- |
+| `read` | Read a UTF-8 file into a `String`. |
+| `write` | Write a `String` to a file, creating it if needed. |
+| `append` | Append a `String` to an existing file. |
+| `delete` | Delete a file or empty directory. |
+| `create_directory_all` | Create a directory and any missing parents. |
+| `read_directory` | List immediate entries in a directory. |
+| `copy` | Copy files or directories to a new path. |
+| `is_file` | Check whether a path is a file. |
 
 ## Installation
 

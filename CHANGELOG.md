@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Expand README example and add selected functions table.
 
 --
 
