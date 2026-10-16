@@ -4,6 +4,10 @@
 
 --
 
+## v2.8.0 - 15 October 2026
+- Add `is_file_or_directory` function for checking if a file or directory exists at a given path, following symlinks.
+- Deprecate `exists`, as its `follow_links` option only applies to the final segment of the path. Use `is_file_or_directory` instead.
+
 ## v2.7.0 - 5 August 2026
 - Add `exists` function for checking if a file, directory, or symlink exists at all at a given path.
 
