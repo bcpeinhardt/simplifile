@@ -515,9 +515,35 @@ pub fn is_symlink(filepath: String) -> Result(Bool, FileError) {
   }
 }
 
+/// Checks if the provided filepath exists and is a file or a directory.
+/// Returns an error if it lacks permissions to read the path.
+/// Returns `Ok(False)` for other kinds of files, like sockets or devices.
+/// Follows symlinks, i.e. returns `Ok(True)` if the path is a symlink to a file or directory,
+/// and `Ok(False)` if the path is a broken symlink.
+///
+/// ## Example
+/// ```gleam
+/// let assert Ok(True) = is_file_or_directory("./test")
+/// ```
+///
+pub fn is_file_or_directory(filepath: String) -> Result(Bool, FileError) {
+  case file_info(filepath) {
+    Ok(info) ->
+      case file_info_type(info) {
+        File | Directory -> Ok(True)
+        Symlink | Other -> Ok(False)
+      }
+    Error(Enoent) -> Ok(False)
+    Error(e) -> Error(e)
+  }
+}
+
 /// Checks if anything exists at the path.
 /// If `follow_links` is true, it will follow a link, returning false if nothing is there.
 /// If `follow_links` is false, it will return true for any symlink.
+/// Note that `follow_links` only applies to the final segment of the path:
+/// symlinked directories earlier in the path are always followed.
+@deprecated("The `follow_links` option is misleading, as symlinked directories earlier in the path are always followed. Use `is_file_or_directory` instead.")
 pub fn exists(
   filepath filepath: String,
   follow_links follow_links: Bool,

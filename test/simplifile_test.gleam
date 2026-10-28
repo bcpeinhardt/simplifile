@@ -12,11 +12,11 @@ import simplifile.{
   Esrch, Estale, Etxtbsy, Exdev, Execute, File, FilePermissions, NotUtf8, Read,
   Unknown, Write, append, append_bits, copy, copy_directory, copy_file,
   create_directory, create_directory_all, create_file, create_link,
-  create_symlink, delete, delete_all, delete_file, exists, file_info,
+  create_symlink, delete, delete_all, delete_file, file_info,
   file_info_permissions, file_info_permissions_octal, file_info_type,
-  file_permissions_to_octal, get_files, is_directory, is_file, is_symlink,
-  link_info, read, read_bits, read_directory, rename, set_permissions,
-  set_permissions_octal, touch, write, write_bits,
+  file_permissions_to_octal, get_files, is_directory, is_file,
+  is_file_or_directory, is_symlink, link_info, read, read_bits, read_directory,
+  rename, set_permissions, set_permissions_octal, touch, write, write_bits,
 }
 
 pub fn main() {
@@ -232,44 +232,38 @@ pub fn is_symlink_test() {
   let assert Ok(_) = delete(the_symlink)
 }
 
-pub fn exists_test() {
+pub fn is_file_or_directory_test() {
   // Nothing at the path
-  let assert Ok(False) = exists("./tmp/does_not_exist", follow_links: True)
-  let assert Ok(False) = exists("./tmp/does_not_exist", follow_links: False)
+  let assert Ok(False) = is_file_or_directory("./tmp/does_not_exist")
 
-  // A regular file
-  let filepath = "./tmp/exists_test.txt"
+  // A regular file and a directory
+  let dir = "./tmp/is_file_or_directory_dir"
+  let file = dir <> "/file.txt"
+  let assert Ok(_) = create_directory(dir)
   let assert Ok(_) =
     ""
-    |> write(to: filepath)
-  let assert Ok(True) = exists(filepath, follow_links: True)
-  let assert Ok(True) = exists(filepath, follow_links: False)
+    |> write(to: file)
+  let assert Ok(True) = is_file_or_directory(file)
+  let assert Ok(True) = is_file_or_directory(dir)
 
-  // A directory
-  let assert Ok(True) = exists("./tmp", follow_links: True)
-  let assert Ok(True) = exists("./tmp", follow_links: False)
-
-  // A symlink pointing at something that exists
-  let symlink_target = "exists_test_target.txt"
-  let symlink_to_existing_target = "./tmp/exists_test_valid_symlink"
+  // Symlinks are followed
+  let symlink_to_file = "./tmp/is_file_or_directory_symlink_to_file"
+  let symlink_to_dir = "./tmp/is_file_or_directory_symlink_to_dir"
+  let broken_symlink = "./tmp/is_file_or_directory_broken_symlink"
   let assert Ok(_) =
-    ""
-    |> write(to: "./tmp/" <> symlink_target)
-  let assert Ok(_) = create_symlink(symlink_target, symlink_to_existing_target)
-  let assert Ok(True) = exists(symlink_to_existing_target, follow_links: True)
-  let assert Ok(True) = exists(symlink_to_existing_target, follow_links: False)
-
-  // A broken symlink: exists when not following links, doesn't when following
-  let broken_symlink = "./tmp/exists_test_broken_symlink"
+    create_symlink("is_file_or_directory_dir/file.txt", symlink_to_file)
+  let assert Ok(_) = create_symlink("is_file_or_directory_dir", symlink_to_dir)
   let assert Ok(_) = create_symlink("does_not_exist_target", broken_symlink)
-  let assert Ok(False) = exists(broken_symlink, follow_links: True)
-  let assert Ok(True) = exists(broken_symlink, follow_links: False)
+  let assert Ok(True) = is_file_or_directory(symlink_to_file)
+  let assert Ok(True) = is_file_or_directory(symlink_to_dir)
+  let assert Ok(True) = is_file_or_directory(symlink_to_dir <> "/file.txt")
+  let assert Ok(False) = is_file_or_directory(broken_symlink)
 
   // Cleanup
-  let assert Ok(_) = delete(filepath)
-  let assert Ok(_) = delete(symlink_to_existing_target)
-  let assert Ok(_) = delete("./tmp/" <> symlink_target)
+  let assert Ok(_) = delete(symlink_to_file)
+  let assert Ok(_) = delete(symlink_to_dir)
   let assert Ok(_) = delete(broken_symlink)
+  let assert Ok(_) = delete(dir)
 }
 
 pub fn create_all_test() {
